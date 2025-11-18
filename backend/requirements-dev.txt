@@ -1,0 +1,6 @@
+-r backend/requirements.txt
+pre-commit
+black
+isort
+ruff
+
