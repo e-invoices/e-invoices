@@ -1,7 +1,9 @@
 """Run pytest only for test files included in the current pre-commit run."""
+
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -28,7 +30,9 @@ def _collect_test_targets(files: Iterable[str]) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description="Run pytest for changed test files only")
+    parser = argparse.ArgumentParser(
+        description="Run pytest for changed test files only"
+    )
     parser.add_argument("files", nargs="*")
     args = parser.parse_args(argv)
 
@@ -37,12 +41,18 @@ def main(argv: list[str]) -> int:
         print("No changed test files detected; skipping pytest run.")
         return 0
 
+    env = os.environ.copy()
+    backend_path = str(REPO_ROOT / "backend")
+    existing = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        backend_path if not existing else os.pathsep.join([backend_path, existing])
+    )
+
     cmd = [sys.executable, "-m", "pytest", *test_targets]
     print("Running:", " ".join(cmd))
-    result = subprocess.run(cmd, cwd=REPO_ROOT)
+    result = subprocess.run(cmd, cwd=REPO_ROOT, env=env)
     return result.returncode
 
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-
