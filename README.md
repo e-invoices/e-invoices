@@ -43,6 +43,8 @@ Visit `http://localhost:8000/api/v1/health/` to verify the service is responding
 ### Environment configuration
 Copy `backend/.env.example` to `backend/.env` (and adjust secrets), then ensure Docker uses it by keeping the file in place. For container-specific overrides, duplicate it as `.env.docker` and update `DATABASE_URL=postgresql+psycopg2://postgres:postgres@db:5432/backend_db`.
 
+## Run tests
+
 ### Run tests (inside backend container)
 ```powershell
 docker compose exec backend /bin/bash
@@ -51,19 +53,46 @@ exit
 ```
 
 ### Run tests (local virtual environment)
+By default the repo's test runner requires that imports like `import app` resolve. The repository provides a small helper script that sets `PYTHONPATH` and runs pytest for specific files.
+
+- To run all tests locally (ensure your virtualenv is activated and `PYTHONPATH` includes `backend`):
 ```powershell
-pytest
+# Activate virtualenv (PowerShell)
+& .\.venv\Scripts\Activate
+# Set PYTHONPATH so imports like `import app` resolve, then run pytest for the whole test suite
+$env:PYTHONPATH = 'backend'
+pytest -q
 ```
 
-### Git hooks: format + lint + tests
-The repo ships with a `.pre-commit-config.yaml` that runs formatting (Black/isort/Ruff) on every commit and executes `pytest backend/tests` before a push.
-
+- Run only a single test file (recommended when iterating on a failing/changed test file). The repo includes `scripts/run_changed_pytest.py` which mirrors the pre-commit behavior. From the repo root with your `.venv` activated you can run:
 ```powershell
+# Run the helper which sets PYTHONPATH and invokes pytest for the given test path
+& .\.venv\Scripts\Activate
+python scripts/run_changed_pytest.py backend\tests\schemas\test_user_schema.py
+```
+
+Or you can set `PYTHONPATH` manually and invoke `pytest` directly:
+```powershell
+& .\.venv\Scripts\Activate
+$env:PYTHONPATH = 'backend'
+pytest backend\tests\schemas\test_user_schema.py -q
+```
+
+## Git hooks: format + lint + tests
+The repository ships a `.pre-commit-config.yaml` that runs formatting (Black/isort/Ruff) on every commit and executes a selective pytest check for changed tests.
+
+- Pre-commit local hook: the project uses a local hook entry that runs `python scripts/run_changed_pytest.py` with `pass_filenames: true`.
+- Behavior: pre-commit passes only the changed/staged file paths to the helper; the helper filters to test files (paths containing `tests` and ending in `.py`), prepends the `backend` directory to `PYTHONPATH`, and invokes `pytest` from the repository root. This means only touched test modules are executed automatically during commits, keeping commits fast while still exercising modified tests.
+
+To install and run hooks locally:
+```powershell
+# install the pre-commit hooks into .git/hooks
 pre-commit install
-pre-commit run --all-files  # optional warm-up
+# optionally run all configured hooks against the whole repo (warm-up)
+pre-commit run --all-files
 ```
-Pre-commit executes a custom helper (`scripts/run_changed_pytest.py`) so only touched test modules run under pytest alongside the formatting hooks.
 
+If you want the pre-commit hook to run the full pytest suite instead of only changed files, update `.pre-commit-config.yaml` (remove `pass_filenames: true` or configure the hook to always run) or run `pytest` directly as shown above.
 
 ## Environments & Docker targets
 Set `APP_ENV` to `development`, `staging`, or `production` to pick the matching Docker multi-stage target and application mode. The value is also loaded from `backend/.env` inside containers.

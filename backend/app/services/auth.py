@@ -8,6 +8,7 @@ from app.schemas.auth import Token
 from app.schemas.user import UserCreate, UserRead
 from app.services.user import UserService
 from fastapi import HTTPException, status
+from pydantic.v1 import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ class AuthService:
         return user
 
     async def register_user(self, payload: UserCreate) -> UserRead:
-        user = await self.user_service.get_by_email(payload.email)
+        user = await self.user_service.get_by_email(EmailStr(payload.email))
         logger.debug("Registering user %s", payload.email)
         if user:
             logger.warning("Registration attempt for existing email %s", payload.email)

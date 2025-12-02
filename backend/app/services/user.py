@@ -4,6 +4,7 @@ from typing import List, Union
 from app.core.security import get_password_hash
 from app.models import user as user_models
 from app.schemas.user import UserCreate, UserRead
+from pydantic.v1 import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,7 +28,7 @@ class UserService:
     ) -> UserRead:
         password_value = hashed_password or get_password_hash(payload.password)
         user = user_models.User(
-            email=payload.email,
+            email=EmailStr(payload.email),
             hashed_password=password_value,
             full_name=payload.full_name,
         )
