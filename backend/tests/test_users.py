@@ -1,6 +1,6 @@
 import pytest
 from app.schemas.user import UserCreate
-from app.services.users import UserService
+from app.services.user import UserService
 from pydantic import EmailStr, TypeAdapter
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,7 +16,7 @@ async def test_create_user(api_client, db_session: AsyncSession):
     payload = UserCreate(
         email=make_email("user@example.com"), password="secret", full_name="Test User"
     )
-    response = await api_client.post("/api/v1/users/", json=payload.model_dump())
+    response = await api_client.post("/api/v1/user/", json=payload.model_dump())
     assert response.status_code == 201
     data = response.json()
     assert data["email"] == payload.email
@@ -34,8 +34,8 @@ async def test_list_users(api_client):
         password="secret",
         full_name="Another User",
     )
-    await api_client.post("/api/v1/users/", json=payload.model_dump())
-    response = await api_client.get("/api/v1/users/")
+    await api_client.post("/api/v1/user/", json=payload.model_dump())
+    response = await api_client.get("/api/v1/user/")
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)

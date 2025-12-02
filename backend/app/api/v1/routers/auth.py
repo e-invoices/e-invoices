@@ -1,3 +1,5 @@
+import logging
+
 from app.db.session import get_session
 from app.schemas.auth import Token
 from app.schemas.user import UserCreate
@@ -6,6 +8,7 @@ from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -14,6 +17,7 @@ async def register_user(
     payload: UserCreate, session: AsyncSession = Depends(get_session)
 ) -> Token:
     auth_service = AuthService(session)
+    logger.debug("Registering new user %s", payload.email)
     user = await auth_service.register_user(payload)
     return auth_service.generate_token(user.id)
 
@@ -24,5 +28,6 @@ async def login_for_access_token(
     session: AsyncSession = Depends(get_session),
 ) -> Token:
     auth_service = AuthService(session)
+    logger.debug("Authenticating user %s", form_data.username)
     user = await auth_service.authenticate_user(form_data.username, form_data.password)
     return auth_service.generate_token(user.id)

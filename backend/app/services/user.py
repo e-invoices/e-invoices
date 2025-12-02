@@ -1,3 +1,4 @@
+import logging
 from typing import List, Union
 
 from app.models import user as user_models
@@ -5,6 +6,8 @@ from app.schemas.user import UserCreate, UserRead
 from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 
 class UserService:
@@ -17,7 +20,9 @@ class UserService:
         result = await self.session.execute(
             select(user_models.User).where(user_models.User.email == str(email))
         )
-        return result.scalar_one_or_none()
+        user = result.scalar_one_or_none()
+        logger.debug("Fetched user by email %s => %s", email, bool(user))
+        return user
 
     async def create_user(
         self, payload: UserCreate, *, hashed_password: str | None = None
@@ -31,8 +36,11 @@ class UserService:
         self.session.add(user)
         await self.session.commit()
         await self.session.refresh(user)
+        logger.info("Created user %s", user.email)
         return UserRead.model_validate(user)
 
     async def list_users(self) -> List[UserRead]:
         result = await self.session.execute(select(user_models.User))
-        return [UserRead.model_validate(user) for user in result.scalars().all()]
+        records = [UserRead.model_validate(user) for user in result.scalars().all()]
+        logger.debug("List users returned %d records", len(records))
+        return records

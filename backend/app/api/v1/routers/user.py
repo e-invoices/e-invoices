@@ -1,9 +1,12 @@
+import logging
+
 from app.db.session import get_session
 from app.schemas.user import UserCreate, UserRead
-from app.services.users import UserService
+from app.services.user import UserService
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -12,6 +15,7 @@ async def create_user(
     payload: UserCreate, session: AsyncSession = Depends(get_session)
 ) -> UserRead:
     service = UserService(session)
+    logger.info("Creating user %s", payload.email)
     existing = await service.get_by_email(payload.email)
     if existing:
         raise HTTPException(
@@ -24,4 +28,5 @@ async def create_user(
 @router.get("/", response_model=list[UserRead])
 async def list_users(session: AsyncSession = Depends(get_session)) -> list[UserRead]:
     service = UserService(session)
+    logger.debug("Listing users")
     return await service.list_users()

@@ -1,7 +1,12 @@
+import logging
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 
 class HealthService:
     @staticmethod
     async def get_status() -> dict:
-        return {"status": "ok", "timestamp": datetime.now(timezone.utc)}
+        status = {"status": "ok", "timestamp": datetime.now(timezone.utc)}
+        logger.debug("Generated health status %s", status)
+        return status

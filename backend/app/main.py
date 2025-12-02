@@ -1,11 +1,16 @@
+import logging
+
 from app.api.v1.routers import api_router
 from app.core.config import get_settings
+from app.core.logging import setup_logging
 from app.middleware import register_middlewares
 from fastapi import FastAPI
 
+settings = get_settings()
+setup_logging(getattr(logging, settings.log_level.upper(), logging.INFO))
+
 
 def create_app() -> FastAPI:
-    settings = get_settings()
     app_instance = FastAPI(
         title=settings.app_name,
         version="0.1.0",

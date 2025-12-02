@@ -59,6 +59,7 @@ class Settings:
     smtp_password: str | None = field(
         default_factory=lambda: _env_optional("SMTP_PASSWORD")
     )
+    log_level: str = field(default_factory=lambda: _env_optional("LOG_LEVEL") or "INFO")
 
 
 @lru_cache
