@@ -41,6 +41,13 @@ async def db_session(db_engine):
     )
     async with async_session() as session:
         yield session
+        await _truncate_all_tables(session)
+
+
+async def _truncate_all_tables(session: AsyncSession) -> None:
+    for table in reversed(Base.metadata.sorted_tables):
+        await session.execute(table.delete())
+    await session.commit()
 
 
 @pytest_asyncio.fixture()

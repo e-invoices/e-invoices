@@ -3,5 +3,5 @@ from fastapi import FastAPI
 
 
 def register_middlewares(app: FastAPI) -> None:
-    if not any(isinstance(m, RequestTimingMiddleware) for m in app.user_middleware):
+    if not any(m.cls is RequestTimingMiddleware for m in app.user_middleware):
         app.add_middleware(RequestTimingMiddleware)

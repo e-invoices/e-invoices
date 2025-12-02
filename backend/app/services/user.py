@@ -1,6 +1,7 @@
 import logging
 from typing import List, Union
 
+from app.core.security import get_password_hash
 from app.models import user as user_models
 from app.schemas.user import UserCreate, UserRead
 from pydantic import EmailStr
@@ -27,7 +28,7 @@ class UserService:
     async def create_user(
         self, payload: UserCreate, *, hashed_password: str | None = None
     ) -> UserRead:
-        password_value = hashed_password or payload.password
+        password_value = hashed_password or get_password_hash(payload.password)
         user = user_models.User(
             email=payload.email,
             hashed_password=password_value,
