@@ -46,37 +46,18 @@ Copy `backend/.env.example` to `backend/.env` (and adjust secrets), then ensure 
 ## Run tests
 
 ### Run tests (inside backend container)
+- Run only a single test file:
 ```powershell
-docker compose exec backend /bin/bash
 pytest
-exit
 ```
 
-### Run tests (local virtual environment)
-By default the repo's test runner requires that imports like `import app` resolve. The repository provides a small helper script that sets `PYTHONPATH` and runs pytest for specific files.
 
-- To run all tests locally (ensure your virtualenv is activated and `PYTHONPATH` includes `backend`):
+
+- Run only a single test file:
 ```powershell
-# Activate virtualenv (PowerShell)
-& .\.venv\Scripts\Activate
-# Set PYTHONPATH so imports like `import app` resolve, then run pytest for the whole test suite
-$env:PYTHONPATH = 'backend'
-pytest -q
+pytest tests/services
 ```
 
-- Run only a single test file (recommended when iterating on a failing/changed test file). The repo includes `scripts/run_changed_pytest.py` which mirrors the pre-commit behavior. From the repo root with your `.venv` activated you can run:
-```powershell
-# Run the helper which sets PYTHONPATH and invokes pytest for the given test path
-& .\.venv\Scripts\Activate
-python scripts/run_changed_pytest.py backend\tests\schemas\test_user_schema.py
-```
-
-Or you can set `PYTHONPATH` manually and invoke `pytest` directly:
-```powershell
-& .\.venv\Scripts\Activate
-$env:PYTHONPATH = 'backend'
-pytest backend\tests\schemas\test_user_schema.py -q
-```
 
 ## Git hooks: format + lint + tests
 The repository ships a `.pre-commit-config.yaml` that runs formatting (Black/isort/Ruff) on every commit and executes a selective pytest check for changed tests.
