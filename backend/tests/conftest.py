@@ -1,10 +1,12 @@
 import asyncio
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
 from app.db.base import Base
 from app.db.session import get_session
 from app.main import app as fastapi_app
+from app.models.user import User as UserModel
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
@@ -59,3 +61,31 @@ async def api_client(db_session):
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
     fastapi_app.dependency_overrides.pop(get_session, None)
+
+
+@pytest.fixture()
+def mock_user_repository():
+    session = AsyncMock(spec=AsyncSession)
+    session.add = Mock()
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
+    session.execute = AsyncMock()
+    return session
+
+
+@pytest.fixture()
+def user_factory():
+    def _factory(
+        *,
+        user_id: int = 1,
+        email: str = "demo@example.com",
+        full_name: str | None = "Demo",
+        hashed_password: str = "hashed",
+    ):
+        user = UserModel(
+            email=email, hashed_password=hashed_password, full_name=full_name
+        )
+        user.id = user_id
+        return user
+
+    return _factory

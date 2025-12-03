@@ -1,21 +1,24 @@
+from typing import cast
+
 import pytest
 from app.schemas.user import UserCreate, UserLogin, UserRead
-from pydantic import ValidationError
-from pydantic.v1 import EmailStr
+from pydantic import EmailStr, ValidationError
 
 
 class _UserRecord:
     """Simple object to emulate ORM model for from_attributes tests."""
 
-    def __init__(self, *, id: int, email: str, full_name: str | None):
-        self.id = id
+    def __init__(self, *, id_: int, email: EmailStr, full_name: str | None):
+        self.id = id_
         self.email = email
         self.full_name = full_name
 
 
 def test_user_create_valid_payload():
     payload = UserCreate(
-        email=EmailStr("demo@example.com"), full_name="Demo", password="secret"
+        email=cast(EmailStr, "demo@example.com"),
+        full_name="Demo",
+        password="secret",
     )
 
     assert payload.email == "demo@example.com"
@@ -30,26 +33,26 @@ def test_user_create_missing_email_raises():
 
 def test_user_create_missing_password_raises():
     with pytest.raises(ValidationError):
-        UserCreate(email=EmailStr("demo@example.com"))
+        UserCreate(email=cast(EmailStr, "demo@example.com"))
 
 
-def test_user_read_from_attributes_object():
-    record = _UserRecord(id=1, email=EmailStr("demo@example.com"), full_name="Demo")
+def test_user_create_full_name_optional_defaults_none():
+    payload = UserCreate(email=cast(EmailStr, "demo@example.com"), password="secret")
+    assert payload.full_name is None
 
-    result = UserRead.model_validate(record)
 
-    assert result.id == 1
-    assert result.email == "demo@example.com"
-    assert result.full_name == "Demo"
+def test_user_create_rejects_short_password():
+    with pytest.raises(ValidationError):
+        UserCreate(email=cast(EmailStr, "demo@example.com"), password="")
 
 
 def test_user_read_invalid_id_type_raises():
     with pytest.raises(ValidationError):
-        UserRead(id="one", email=EmailStr("demo@example.com"), full_name=None)
+        UserRead(id="one", email=cast(EmailStr, "demo@example.com"), full_name=None)
 
 
 def test_user_login_validates_email_format():
-    login = UserLogin(email=EmailStr("demo@example.com"), password="secret")
+    login = UserLogin(email=cast(EmailStr, "demo@example.com"), password="secret")
 
     assert login.email == "demo@example.com"
     assert login.password == "secret"
@@ -57,4 +60,12 @@ def test_user_login_validates_email_format():
 
 def test_user_login_invalid_email_raises():
     with pytest.raises(ValidationError):
-        UserLogin(email=EmailStr("not-an-email"), password="secret")
+        UserLogin(email=cast(EmailStr, "not-an-email"), password="secret")
+
+
+def test_user_read_excludes_password_from_model_validate():
+    record = _UserRecord(
+        id_=1, email=cast(EmailStr, "demo@example.com"), full_name=None
+    )
+    result = UserRead.model_validate(record)
+    assert not hasattr(result, "hashed_password")

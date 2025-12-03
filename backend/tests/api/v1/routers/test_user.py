@@ -4,10 +4,6 @@ from fastapi import status
 from httpx import AsyncClient
 from pydantic.v1 import EmailStr
 
-# -----------------------------
-# POST /users
-# -----------------------------
-
 
 @pytest.mark.asyncio
 async def test_create_user_success(async_client: AsyncClient, mock_user_service):
@@ -41,17 +37,12 @@ async def test_create_user_duplicate_email(
 async def test_create_user_validation_error(
     async_client: AsyncClient, mock_user_service
 ):
-    payload = {"password": "123"}  # missing required email field
+    payload = {"password": "123"}
 
     response = await async_client.post("/api/v1/user/", json=payload)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     mock_user_service.get_by_email.assert_not_called()
-
-
-# -----------------------------
-# GET /users
-# -----------------------------
 
 
 @pytest.mark.asyncio
