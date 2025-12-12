@@ -1,10 +1,13 @@
+name: e-invoices
+
 services:
   backend:
     build:
       context: ..
       dockerfile: docker/backend/Dockerfile
       target: ${APP_ENV:-development}
-    container_name: backend
+    container_name: backend-invoice
+    image: backend-invoice
     env_file:
       - ../backend/.env
     environment:
@@ -22,7 +25,8 @@ services:
       context: ..
       dockerfile: docker/frontend/Dockerfile
       target: ${APP_ENV:-development}
-    container_name: frontend
+    container_name: frontend-invoice
+    image: frontend-invoice
     ports:
       - "5173:5173"
     volumes:
@@ -35,7 +39,7 @@ services:
 
   db:
     image: postgres:latest
-    container_name: postgres
+    container_name: database-invoice
     restart: unless-stopped
     env_file:
       - ../backend/.env
