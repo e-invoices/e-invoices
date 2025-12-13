@@ -1,14 +1,36 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  { path: '/', redirect: '/upload' },
   {
-    path: '/upload',
-    component: () => import('@/pages/UploadPage.vue'),
-  },
-  {
-    path: '/preview',
-    component: () => import('@/pages/PreviewPage.vue'),
+    path: '/',
+    component: () => import('@/layouts/PublicLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'landing',
+        component: () => import('@/pages/public/LandingPage.vue'),
+      },
+      {
+        path: 'how-it-works',
+        name: 'tutorial',
+        component: () => import('@/pages/public/TutorialPage.vue'),
+      },
+      {
+        path: 'benefits',
+        name: 'about',
+        component: () => import('@/pages/public/AboutPage.vue'),
+      },
+      {
+        path: 'pricing',
+        name: 'pricing',
+        component: () => import('@/pages/public/PricingPage.vue'),
+      },
+      {
+        path: 'api',
+        name: 'api',
+        component: () => import('@/pages/public/ApiPage.vue'),
+      },
+    ],
   },
 ]
 
