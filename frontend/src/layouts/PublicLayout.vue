@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { computed, ref, onMounted, watch } from 'vue'
 import LoginModal from '@/components/auth/LoginModal.vue'
 import RegisterModal from '@/components/auth/RegisterModal.vue'
+import LanguageFlag from '@/components/ui/LanguageFlag.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useTheme } from '@/composables/useTheme'
 import type { User } from '@/types/auth'
@@ -42,9 +43,33 @@ const menuItems = computed(() => [
   { label: t('nav.pricing'), path: '/pricing' },
 ])
 
-const toggleLanguage = () => {
-  locale.value = locale.value === 'mk' ? 'en' : 'mk'
+// Language dropdown
+const languageDropdownOpen = ref(false)
+
+interface LangOption {
+  code: string
+  name: string
 }
+
+const languages: LangOption[] = [
+  { code: 'mk', name: 'Македонски' },
+  { code: 'en', name: 'English' },
+  { code: 'sq', name: 'Shqip' },
+]
+
+const currentLanguage = computed((): LangOption => {
+  return languages.find(lang => lang.code === locale.value) || languages[0]!
+})
+
+const setLanguage = (code: string) => {
+  locale.value = code
+  languageDropdownOpen.value = false
+}
+
+const toggleLanguageDropdown = () => {
+  languageDropdownOpen.value = !languageDropdownOpen.value
+}
+
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value
@@ -67,6 +92,14 @@ const handleMobileRegister = () => {
 const handleMobileLogout = () => {
   closeMobileMenu()
   logout()
+}
+
+// Close language dropdown when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (!target.closest('.language-dropdown')) {
+    languageDropdownOpen.value = false
+  }
 }
 
 // Initialize Google Sign-In when modals open
@@ -92,6 +125,7 @@ watch(showRegisterModal, async (isOpen) => {
 onMounted(async () => {
   await loadGoogleScript()
   await checkSession()
+  document.addEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -138,13 +172,36 @@ onMounted(async () => {
               </svg>
             </button>
 
-            <!-- Language Toggle -->
-            <button
-              @click="toggleLanguage"
-              class="w-10 px-3 py-2 font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer"
-            >
-              {{ locale === 'mk' ? 'EN' : 'MK' }}
-            </button>
+            <!-- Language Dropdown -->
+            <div class="relative language-dropdown">
+              <button
+                @click="toggleLanguageDropdown"
+                class="flex items-center gap-2 px-3 py-2 font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer"
+              >
+                <LanguageFlag :code="currentLanguage.code" />
+                <span class="text-sm">{{ currentLanguage.name }}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div
+                v-show="languageDropdownOpen"
+                class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50"
+              >
+                <button
+                  v-for="lang in languages"
+                  :key="lang.code"
+                  @click="setLanguage(lang.code)"
+                  class="w-full flex items-center gap-3 px-4 py-2 text-left text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-transparent border-none cursor-pointer"
+                  :class="{ 'bg-slate-100 dark:bg-slate-700': locale === lang.code }"
+                >
+                  <LanguageFlag :code="lang.code" />
+                  <span class="text-sm">{{ lang.name }}</span>
+                </button>
+              </div>
+            </div>
 
             <!-- Auth buttons when not logged in -->
             <div v-if="!isAuthenticated" class="flex items-center gap-3">
@@ -219,13 +276,20 @@ onMounted(async () => {
               {{ isDark ? t('theme.light') : t('theme.dark') }}
             </button>
 
-            <!-- Language Toggle -->
-            <button
-              @click="toggleLanguage"
-              class="px-3 py-2 text-left font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors duration-200 bg-transparent border-none cursor-pointer"
-            >
-              {{ locale === 'mk' ? 'Switch to English' : 'Премини на Македонски' }}
-            </button>
+            <!-- Language Selection for Mobile -->
+            <div class="flex flex-col gap-1">
+              <span class="px-3 py-1 text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider">{{ t('language.label') }}</span>
+              <button
+                v-for="lang in languages"
+                :key="lang.code"
+                @click="setLanguage(lang.code); closeMobileMenu()"
+                class="flex items-center gap-3 px-3 py-2 text-left font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors duration-200 bg-transparent border-none cursor-pointer"
+                :class="{ 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white': locale === lang.code }"
+              >
+                <LanguageFlag :code="lang.code" />
+                <span class="text-sm">{{ lang.name }}</span>
+              </button>
+            </div>
 
             <!-- Mobile auth buttons -->
             <div v-if="!isAuthenticated" class="flex flex-col gap-2 px-3">

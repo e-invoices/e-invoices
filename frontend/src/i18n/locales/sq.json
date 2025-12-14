@@ -1,0 +1,124 @@
+{
+  "nav": {
+    "howItWorks": "Si funksionon",
+    "benefits": "Përfitimet",
+    "pricing": "Çmimet",
+    "login": "Kyçu",
+    "register": "Regjistrohu",
+    "upload": "Ngarko",
+    "preview": "Parashiko",
+    "logout": "Dilni"
+  },
+  "theme": {
+    "light": "Tema e ndritshme",
+    "dark": "Tema e errët"
+  },
+  "auth": {
+    "or": "ose vazhdo me email",
+    "email": "Email",
+    "emailPlaceholder": "juaji{'@'}email.com",
+    "password": "Fjalëkalimi",
+    "passwordPlaceholder": "Vendosni fjalëkalimin tuaj",
+    "confirmPassword": "Konfirmo fjalëkalimin",
+    "confirmPasswordPlaceholder": "Konfirmoni fjalëkalimin tuaj",
+    "fullName": "Emri i plotë",
+    "fullNamePlaceholder": "Filan Fisteku",
+    "forgotPassword": "Keni harruar fjalëkalimin?",
+    "loading": "Ju lutemi prisni...",
+    "login": {
+      "title": "Mirë se u kthyet",
+      "subtitle": "Kyçuni për të vazhduar",
+      "button": "Kyçu",
+      "noAccount": "Nuk keni llogari?",
+      "registerLink": "Regjistrohu"
+    },
+    "register": {
+      "title": "Krijo llogari",
+      "subtitle": "Filloni provën tuaj falas",
+      "button": "Krijo llogari",
+      "hasAccount": "Keni tashmë një llogari?",
+      "loginLink": "Kyçu",
+      "acceptTerms": "Pranoj",
+      "termsLink": "Kushtet e përdorimit"
+    },
+    "errors": {
+      "fillAllFields": "Ju lutemi plotësoni të gjitha fushat",
+      "invalidCredentials": "Email ose fjalëkalim i pavlefshëm",
+      "loginFailed": "Kyçja dështoi. Provoni përsëri.",
+      "googleLoginFailed": "Kyçja me Google dështoi. Provoni përsëri.",
+      "registerFailed": "Regjistrimi dështoi. Provoni përsëri.",
+      "googleRegisterFailed": "Regjistrimi me Google dështoi. Provoni përsëri.",
+      "passwordMismatch": "Fjalëkalimet nuk përputhen",
+      "passwordTooShort": "Fjalëkalimi duhet të ketë të paktën 8 karaktere",
+      "acceptTerms": "Duhet të pranoni kushtet e përdorimit"
+    }
+  },
+  "landing": {
+    "eyebrow": "FINTECH | FATURA ELEKTRONIKE",
+    "title": "Përgatituni për 2026:\nFatura elektronike\ntë miratuara nga DAP.",
+    "description": "Automatizoni lëshimin e faturave sipas standardeve më të fundit (UBL 2.1). E sigurt, e nënshkruar dhe e dorëzuar menjëherë në sistemin DAP dhe klientëve tuaj.",
+    "subtext": "Rregullorja e re e Ministrisë së Financave kërkon proces të certifikuar dhe konfirmim elektronik — ne ju mbulojmë me siguri end-to-end.",
+    "startFree": "Fillo Falas",
+    "viewDemo": "Shiko Demo",
+    "imageCaption": "Ndërfaqe moderne Fintech për e-fatura dhe raporte të menjëhershme.",
+    "stats": {
+      "timeLabel": "Koha e lëshimit",
+      "timeValue": "10 sekonda",
+      "timeDesc": "Gjenerim automatik i XML dhe nënshkrimit XAdES.",
+      "complianceLabel": "Përfundimi",
+      "complianceValue": "100% Përputhshmëri",
+      "complianceDesc": "Validim i garantuar sipas EN 16931."
+    }
+  },
+  "about": {
+    "title": "Rreth Nesh",
+    "description": "Informacion rreth kompanisë dhe misionit."
+  },
+  "tutorial": {
+    "title": "Tutorial i Detajuar",
+    "description": "Udhëzues hap pas hapi për përdorimin e platformës."
+  },
+  "api": {
+    "title": "Dokumentacioni API",
+    "description": "Dokumentacion teknik për zhvilluesit."
+  },
+  "pricing": {
+    "title": "Çmimet",
+    "description": "Planet tona të çmimeve."
+  },
+  "upload": {
+    "step": "Hapi 1",
+    "title": "Ngarko dokumentin JSON",
+    "lead": "Tërhiqni skedarin `.json` ose kërkoni për të zgjedhur. Parashikimi ruhet automatikisht për hapin tjetër.",
+    "label": "Ngarko dokumentin",
+    "hint": "JSON i sanuar për parashikimin e faturës",
+    "button": "Ngarko",
+    "loading": "Duke ngarkuar…",
+    "error": "Nuk mund të ngarkohej dokumenti.",
+    "resultTitle": "Rezultati i ngarkimit"
+  },
+  "preview": {
+    "step": "Hapi 2",
+    "title": "Parashiko dokumentin",
+    "lead": "Shikoni paraqitjet JSON dhe XML të gjeneruara nga sistemi.",
+    "errorMissing": "Së pari ngarkoni një dokument për të parë parashikimin.",
+    "errorRead": "Nuk mund të lexohej parashikimi. Ju lutemi ngarkoni përsëri.",
+    "jsonTitle": "Parashikimi JSON",
+    "jsonDesc": "Strukturë e gjeneruar automatikisht",
+    "xmlTitle": "Parashikimi XML",
+    "xmlDesc": "Përfaqësimi XML nga sistemi"
+  },
+  "footer": {
+    "rights": "© 2025 e-Faktura. Të gjitha të drejtat e rezervuara."
+  },
+  "verifyEmail": {
+    "verifying": "Duke verifikuar emailin tuaj...",
+    "successTitle": "Emaili u verifikua!",
+    "successMessage": "Emaili juaj u verifikua me sukses. Tani mund të kyçeni në llogarinë tuaj.",
+    "loginButton": "Shko te kyçja",
+    "errorTitle": "Verifikimi dështoi",
+    "noToken": "Nuk u dha token verifikimi.",
+    "genericError": "Verifikimi i emailit dështoi. Linku mund të ketë skaduar.",
+    "homeButton": "Shko në fillim"
+  }
+}
