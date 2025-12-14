@@ -51,6 +51,9 @@ class Settings:
     access_token_expire_minutes: int = field(
         default_factory=lambda: _env_required_int("ACCESS_TOKEN_EXPIRE_MINUTES")
     )
+    refresh_token_expire_days: int = field(
+        default_factory=lambda: int(_env_optional("REFRESH_TOKEN_EXPIRE_DAYS") or "7")
+    )
     jwt_algorithm: str = field(default_factory=lambda: _env_required("JWT_ALGORITHM"))
     email_from: str = field(default_factory=lambda: _env_required("EMAIL_FROM"))
     smtp_host: str = field(default_factory=lambda: _env_required("SMTP_HOST"))
@@ -60,6 +63,23 @@ class Settings:
         default_factory=lambda: _env_optional("SMTP_PASSWORD")
     )
     log_level: str = field(default_factory=lambda: _env_optional("LOG_LEVEL") or "INFO")
+
+    # CORS
+    cors_origins: list[str] = field(
+        default_factory=lambda: [
+            origin.strip()
+            for origin in (_env_optional("CORS_ORIGINS") or "http://localhost:5173").split(",")
+            if origin.strip()
+        ]
+    )
+
+    # Google OAuth
+    google_client_id: str | None = field(
+        default_factory=lambda: _env_optional("GOOGLE_CLIENT_ID")
+    )
+    google_client_secret: str | None = field(
+        default_factory=lambda: _env_optional("GOOGLE_CLIENT_SECRET")
+    )
 
 
 @lru_cache

@@ -5,26 +5,14 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="page-container">
-    <div class="container">
-      <h1>{{ t('api.title') }}</h1>
-      <p>{{ t('api.description') }}</p>
+  <div class="min-h-screen bg-gray-50 py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-4 md:mb-6">
+        {{ t('api.title') }}
+      </h1>
+      <p class="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed">
+        {{ t('api.description') }}
+      </p>
     </div>
   </div>
 </template>
-
-<style scoped>
-.page-container {
-  padding: 4rem 0;
-}
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-h1 {
-  font-size: 2.5rem;
-  color: #0f172a;
-  margin-bottom: 1.5rem;
-}
-</style>

@@ -46,3 +46,24 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## Docker Development
+
+### Rebuild Frontend Container (After Adding New Libraries)
+
+When you add a new npm package/library to the frontend, you need to rebuild the Docker container for the changes to take effect:
+
+```sh
+docker-compose -f docker/docker-compose.yml down frontend
+docker-compose -f docker/docker-compose.yml build --no-cache frontend
+docker-compose -f docker/docker-compose.yml up -d frontend
+```
+
+Or as a single command:
+
+```sh
+docker-compose -f docker/docker-compose.yml down frontend && docker-compose -f docker/docker-compose.yml build --no-cache frontend && docker-compose -f docker/docker-compose.yml up -d frontend
+```
+
+**Note:** Run these commands from the project root directory (`e-invoices/`).
+

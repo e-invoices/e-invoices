@@ -27,3 +27,7 @@ pytest
 pytest-asyncio
 tenacity
 pydantic-settings
+google-auth
+google-auth-httplib2
+requests
+fastapi-mail

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const { t, locale } = useI18n()
+
+const mobileMenuOpen = ref(false)
 
 const navItems = computed(() => [
   { label: t('nav.upload'), path: '/app/upload' },
@@ -13,134 +15,92 @@ const navItems = computed(() => [
 const toggleLanguage = () => {
   locale.value = locale.value === 'mk' ? 'en' : 'mk'
 }
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
 </script>
 
 <template>
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="header-left">
-        <div>
-          <p class="eyebrow">E-Invoices</p>
-          <h1>Document Workbench</h1>
+  <div class="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-6 lg:p-8 font-sans">
+    <!-- Header -->
+    <header class="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6">
+      <div class="flex items-center justify-between gap-4">
+        <!-- Left Section: Logo & Nav -->
+        <div class="flex items-center gap-4 md:gap-8">
+          <div>
+            <p class="uppercase tracking-widest text-xs text-slate-500 mb-0.5">E-Invoices</p>
+            <h1 class="text-lg md:text-xl font-bold text-slate-900 m-0">Document Workbench</h1>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <nav class="hidden sm:flex gap-2 md:gap-3">
+            <RouterLink
+              v-for="item in navItems"
+              :key="item.path"
+              :to="item.path"
+              class="min-w-[90px] text-center px-3 md:px-4 py-2 text-slate-900 font-semibold rounded-full border border-slate-200 bg-white hover:border-slate-300 transition-colors duration-200 no-underline text-sm whitespace-nowrap"
+              active-class="!bg-slate-200 !border-slate-300"
+            >
+              {{ item.label }}
+            </RouterLink>
+          </nav>
         </div>
-        <nav class="main-nav">
+
+        <!-- Right Section -->
+        <div class="flex items-center gap-2 md:gap-4">
+          <button
+            @click="toggleLanguage"
+            class="hidden sm:block w-12 text-center px-3 md:px-4 py-2 border border-slate-200 rounded-lg font-semibold text-slate-500 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50 transition-all duration-200 bg-transparent cursor-pointer text-sm"
+          >
+            {{ locale === 'mk' ? 'EN' : 'MK' }}
+          </button>
+
+          <!-- Mobile Menu Button -->
+          <button
+            @click="toggleMobileMenu"
+            class="sm:hidden p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors duration-200 bg-transparent border-none cursor-pointer"
+          >
+            <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div
+        v-show="mobileMenuOpen"
+        class="sm:hidden mt-4 pt-4 border-t border-slate-100"
+      >
+        <nav class="flex flex-col gap-2">
           <RouterLink
             v-for="item in navItems"
             :key="item.path"
             :to="item.path"
-            class="nav-link"
-            active-class="nav-link--active"
+            class="px-3 py-2 text-slate-900 font-semibold rounded-lg hover:bg-slate-100 transition-colors duration-200 no-underline"
+            active-class="bg-slate-200"
+            @click="mobileMenuOpen = false"
           >
             {{ item.label }}
           </RouterLink>
         </nav>
+        <button
+          @click="toggleLanguage"
+          class="mt-3 w-full px-3 py-2 text-left border border-slate-200 rounded-lg font-semibold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 bg-transparent cursor-pointer"
+        >
+          {{ locale === 'mk' ? 'Switch to English' : 'Премини на Македонски' }}
+        </button>
       </div>
-
-      <button @click="toggleLanguage" class="lang-btn">
-        {{ locale === 'mk' ? 'EN' : 'MK' }}
-      </button>
     </header>
 
-    <main class="app-main">
+    <!-- Main Content -->
+    <main class="mt-4 md:mt-6 lg:mt-8 bg-white rounded-xl md:rounded-2xl p-4 md:p-6 lg:p-8 shadow-lg">
       <RouterView />
     </main>
   </div>
 </template>
 
-<style scoped>
-.app-shell {
-  min-height: 100vh;
-  background: #f8fafc;
-  color: #0f172a;
-  padding: 2rem;
-  box-sizing: border-box;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-  background: #ffffff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 15px 40px rgba(15, 23, 42, 0.05);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.eyebrow {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  font-size: 0.75rem;
-  color: rgba(15, 23, 42, 0.6);
-}
-
-.main-nav {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.nav-link {
-  color: #0f172a;
-  text-decoration: none;
-  padding: 0.45rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.15);
-  font-weight: 600;
-  background: #ffffff;
-  transition: background 0.2s ease, border 0.2s ease;
-}
-
-.nav-link:hover {
-  border-color: rgba(15, 23, 42, 0.3);
-}
-
-.nav-link--active {
-  background: #e2e8f0;
-  border-color: rgba(15, 23, 42, 0.3);
-}
-
-.lang-btn {
-  background: none;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  transition: all 0.2s;
-}
-
-.lang-btn:hover {
-  color: #0f172a;
-  border-color: #cbd5e1;
-  background: #f8fafc;
-}
-
-.app-main {
-  margin-top: 2rem;
-  background: #ffffff;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 15px 40px rgba(15, 23, 42, 0.05);
-}
-
-@media (max-width: 640px) {
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .main-nav {
-    flex-wrap: wrap;
-  }
-}
-</style>

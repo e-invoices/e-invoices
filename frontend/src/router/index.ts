@@ -30,6 +30,11 @@ const routes = [
         name: 'api',
         component: () => import('@/pages/public/ApiPage.vue'),
       },
+      {
+        path: 'verify-email',
+        name: 'verify-email',
+        component: () => import('@/pages/public/VerifyEmailPage.vue'),
+      },
     ],
   },
 ]
@@ -37,6 +42,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+// Navigation guard for protected routes
+router.beforeEach((to, _from, next) => {
+  const isAuthenticated = !!localStorage.getItem('access_token')
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // Redirect to landing page if trying to access protected route
+    next({ name: 'landing' })
+  } else {
+    next()
+  }
 })
 
 export default router
