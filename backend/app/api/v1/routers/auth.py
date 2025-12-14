@@ -40,8 +40,7 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
 
 @router.post("/login", response_model=AuthResponse)
 async def login(
-    payload: LoginRequest,
-    session: AsyncSession = Depends(get_session)
+    payload: LoginRequest, session: AsyncSession = Depends(get_session)
 ) -> AuthResponse:
     """Login with email and password"""
     auth_service = AuthService(session)
@@ -49,10 +48,11 @@ async def login(
     return await auth_service.login(payload)
 
 
-@router.post("/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=AuthResponse, status_code=status.HTTP_201_CREATED
+)
 async def register(
-    payload: RegisterRequest,
-    session: AsyncSession = Depends(get_session)
+    payload: RegisterRequest, session: AsyncSession = Depends(get_session)
 ) -> AuthResponse:
     """Register a new user with email and password"""
     auth_service = AuthService(session)
@@ -62,8 +62,7 @@ async def register(
 
 @router.post("/google", response_model=AuthResponse)
 async def google_auth(
-    payload: GoogleAuthRequest,
-    session: AsyncSession = Depends(get_session)
+    payload: GoogleAuthRequest, session: AsyncSession = Depends(get_session)
 ) -> AuthResponse:
     """Authenticate or register via Google OAuth"""
     auth_service = AuthService(session)
@@ -74,7 +73,7 @@ async def google_auth(
 @router.get("/me", response_model=UserRead)
 async def get_current_user(
     user_id: int = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> UserRead:
     """Get current authenticated user"""
     auth_service = AuthService(session)
@@ -85,32 +84,36 @@ async def get_current_user(
 async def set_password(
     payload: SetPasswordRequest,
     user_id: int = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> UserRead:
     """Set password for OAuth users who want to add email/password login"""
     auth_service = AuthService(session)
     logger.debug("Set password request for user_id=%s", user_id)
-    return await auth_service.set_password(user_id, payload.password, payload.confirm_password)
+    return await auth_service.set_password(
+        user_id, payload.password, payload.confirm_password
+    )
 
 
 @router.post("/change-password", response_model=UserRead)
 async def change_password(
     payload: ChangePasswordRequest,
     user_id: int = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> UserRead:
     """Change password for users with existing password"""
     auth_service = AuthService(session)
     logger.debug("Change password request for user_id=%s", user_id)
     return await auth_service.change_password(
-        user_id, payload.current_password, payload.new_password, payload.confirm_password
+        user_id,
+        payload.current_password,
+        payload.new_password,
+        payload.confirm_password,
     )
 
 
 @router.post("/verify-email", response_model=UserRead)
 async def verify_email(
-    token: str,
-    session: AsyncSession = Depends(get_session)
+    token: str, session: AsyncSession = Depends(get_session)
 ) -> UserRead:
     """Verify user email with token from verification email"""
     auth_service = AuthService(session)
@@ -121,7 +124,7 @@ async def verify_email(
 @router.post("/resend-verification")
 async def resend_verification(
     user_id: int = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> dict:
     """Resend verification email to current user"""
     auth_service = AuthService(session)
@@ -139,8 +142,7 @@ async def logout() -> dict:
 
 @router.post("/refresh", response_model=AuthResponse)
 async def refresh_token(
-    payload: RefreshTokenRequest,
-    session: AsyncSession = Depends(get_session)
+    payload: RefreshTokenRequest, session: AsyncSession = Depends(get_session)
 ) -> AuthResponse:
     """Get new access token using refresh token"""
     try:
@@ -149,8 +151,7 @@ async def refresh_token(
         # Verify it's a refresh token
         if token_payload.get("type") != "refresh":
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token type"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type"
             )
 
         user_id = int(token_payload.get("sub"))
@@ -167,13 +168,13 @@ async def refresh_token(
             access_token=token.access_token,
             refresh_token=token.refresh_token,
             token_type=token.token_type,
-            user=user
+            user=user,
         )
     except (ValueError, TypeError) as e:
         logger.warning("Invalid refresh token: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired refresh token"
+            detail="Invalid or expired refresh token",
         )
 
 

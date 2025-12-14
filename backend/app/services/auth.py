@@ -2,8 +2,6 @@ import logging
 from datetime import timedelta
 from typing import Optional
 
-from pydantic.v1 import EmailStr
-
 from app.core.config import get_settings
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models import user as user_models
@@ -21,6 +19,7 @@ from app.services.user import UserService
 from fastapi import HTTPException, status
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
+from pydantic.v1 import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -40,7 +39,7 @@ class AuthService:
             logger.warning("Login attempt for non-existent email %s", payload.email)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password"
+                detail="Invalid email or password",
             )
 
         # Check if user registered via OAuth (no password)
@@ -48,20 +47,20 @@ class AuthService:
             logger.warning("Password login attempt for OAuth user %s", payload.email)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="This account uses Google sign-in. Please use 'Continue with Google'."
+                detail="This account uses Google sign-in. Please use 'Continue with Google'.",
             )
 
         if not verify_password(payload.password, user.hashed_password):
             logger.warning("Failed password verification for %s", payload.email)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password"
+                detail="Invalid email or password",
             )
 
         if not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Account is deactivated"
+                detail="Account is deactivated",
             )
 
         await self.user_service.update_last_login(user)
@@ -73,7 +72,7 @@ class AuthService:
             access_token=token.access_token,
             refresh_token=token.refresh_token,
             token_type=token.token_type,
-            user=user_read
+            user=user_read,
         )
 
     async def register(self, payload: RegisterRequest) -> AuthResponse:
@@ -84,20 +83,23 @@ class AuthService:
             logger.warning("Registration attempt for existing email %s", payload.email)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
+                detail="Email already registered",
             )
 
         from app.schemas.user import UserCreate
+
         hashed_password = get_password_hash(payload.password)
         user_create = UserCreate(
-            email=payload.email,
-            password=payload.password,
-            full_name=payload.name
+            email=payload.email, password=payload.password, full_name=payload.name
         )
-        user_read = await self.user_service.create_user(user_create, hashed_password=hashed_password)
+        user_read = await self.user_service.create_user(
+            user_create, hashed_password=hashed_password
+        )
 
         # Send verification email
-        await self._send_verification_email(user_read.id, str(payload.email), payload.name)
+        await self._send_verification_email(
+            user_read.id, str(payload.email), payload.name
+        )
 
         token = self._generate_token(user_read.id)
 
@@ -106,7 +108,7 @@ class AuthService:
             access_token=token.access_token,
             refresh_token=token.refresh_token,
             token_type=token.token_type,
-            user=user_read
+            user=user_read,
         )
 
     async def google_auth(self, payload: GoogleAuthRequest) -> AuthResponse:
@@ -117,7 +119,7 @@ class AuthService:
         if not google_user.email_verified:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Google email is not verified"
+                detail="Google email is not verified",
             )
 
         # Check if user exists by Google ID
@@ -133,7 +135,7 @@ class AuthService:
                     user,
                     google_id=google_user.sub,
                     picture_url=google_user.picture,
-                    full_name=google_user.name
+                    full_name=google_user.name,
                 )
                 logger.info("Linked Google account to existing user %s", user.email)
             else:
@@ -144,7 +146,7 @@ class AuthService:
                     auth_provider=AuthProvider.GOOGLE.value,
                     google_id=google_user.sub,
                     picture_url=google_user.picture,
-                    is_verified=True
+                    is_verified=True,
                 )
                 user_read = await self.user_service.create_oauth_user(oauth_user)
                 user = await self.user_service.get_by_id(user_read.id)
@@ -153,13 +155,13 @@ class AuthService:
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create or retrieve user"
+                detail="Failed to create or retrieve user",
             )
 
         if not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Account is deactivated"
+                detail="Account is deactivated",
             )
 
         await self.user_service.update_last_login(user)
@@ -170,7 +172,7 @@ class AuthService:
             access_token=token.access_token,
             refresh_token=token.refresh_token,
             token_type=token.token_type,
-            user=user_read
+            user=user_read,
         )
 
     async def get_current_user(self, user_id: int) -> UserRead:
@@ -178,62 +180,64 @@ class AuthService:
         user = await self.user_service.get_by_id(user_id)
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         return UserRead.model_validate(user)
 
-    async def set_password(self, user_id: int, password: str, confirm_password: str) -> UserRead:
+    async def set_password(
+        self, user_id: int, password: str, confirm_password: str
+    ) -> UserRead:
         """Set password for OAuth user who wants to add email/password login"""
         if password != confirm_password:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Passwords do not match"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match"
             )
 
         user = await self.user_service.get_by_id(user_id)
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
         if user.hashed_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Password already set. Use change password instead."
+                detail="Password already set. Use change password instead.",
             )
 
         hashed_password = get_password_hash(password)
         return await self.user_service.set_password(user, hashed_password)
 
     async def change_password(
-        self, user_id: int, current_password: str, new_password: str, confirm_password: str
+        self,
+        user_id: int,
+        current_password: str,
+        new_password: str,
+        confirm_password: str,
     ) -> UserRead:
         """Change password for user with existing password"""
         if new_password != confirm_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="New passwords do not match"
+                detail="New passwords do not match",
             )
 
         user = await self.user_service.get_by_id(user_id)
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
         if not user.hashed_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No password set. Use set password instead."
+                detail="No password set. Use set password instead.",
             )
 
         if not verify_password(current_password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Current password is incorrect"
+                detail="Current password is incorrect",
             )
 
         hashed_password = get_password_hash(new_password)
@@ -244,19 +248,20 @@ class AuthService:
         if not settings.google_client_id:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Google OAuth is not configured"
+                detail="Google OAuth is not configured",
             )
 
         try:
             # Verify the token
             id_info = id_token.verify_oauth2_token(
-                token,
-                google_requests.Request(),
-                settings.google_client_id
+                token, google_requests.Request(), settings.google_client_id
             )
 
             # Verify issuer
-            if id_info["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
+            if id_info["iss"] not in [
+                "accounts.google.com",
+                "https://accounts.google.com",
+            ]:
                 raise ValueError("Invalid issuer")
 
             return GoogleUserInfo(
@@ -266,13 +271,12 @@ class AuthService:
                 name=id_info.get("name"),
                 given_name=id_info.get("given_name"),
                 family_name=id_info.get("family_name"),
-                picture=id_info.get("picture")
+                picture=id_info.get("picture"),
             )
         except ValueError as e:
             logger.error("Google token verification failed: %s", str(e))
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid Google token"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token"
             )
 
     async def _send_verification_email(
@@ -283,9 +287,7 @@ class AuthService:
 
         verification_token = email_service.generate_verification_token(user_id)
         success = email_service.send_verification_email(
-            to_email=email,
-            user_name=name,
-            verification_token=verification_token
+            to_email=email, user_name=name, verification_token=verification_token
         )
         if not success:
             logger.warning("Failed to send verification email to %s", email)
@@ -300,26 +302,25 @@ class AuthService:
         except (ValueError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid or expired verification token"
+                detail="Invalid or expired verification token",
             )
 
         user = await self.user_service.get_by_id(user_id)
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
         if user.is_verified:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already verified"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email already verified"
             )
 
         user_read = await self.user_service.verify_user(user)
 
         # Send welcome email
         from app.services.email import email_service
+
         email_service.send_welcome_email(user.email, user.full_name)
 
         logger.info("User %s verified email successfully", user.email)
@@ -330,14 +331,12 @@ class AuthService:
         user = await self.user_service.get_by_id(user_id)
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
         if user.is_verified:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already verified"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email already verified"
             )
 
         await self._send_verification_email(user.id, user.email, user.full_name)
@@ -347,7 +346,11 @@ class AuthService:
     async def authenticate_user(self, email: str, password: str) -> user_models.User:
         user = await self.user_service.get_by_email(email)
         logger.info("Authenticating user %s", email)
-        if not user or not user.hashed_password or not verify_password(password, user.hashed_password):
+        if (
+            not user
+            or not user.hashed_password
+            or not verify_password(password, user.hashed_password)
+        ):
             logger.warning("Failed authentication for %s", email)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
@@ -355,7 +358,6 @@ class AuthService:
         return user
 
     async def register_user(self, payload) -> UserRead:
-
         user = await self.user_service.get_by_email(str(payload.email))
         logger.debug("Registering user %s", payload.email)
         if user:
@@ -374,10 +376,13 @@ class AuthService:
         user_id: int, expires_delta: Optional[timedelta] = None
     ) -> Token:
         from app.core.security import create_refresh_token
+
         logger.debug("Generating tokens for user_id=%s", user_id)
         access_token = create_access_token(user_id, expires_delta)
         refresh_token = create_refresh_token(user_id)
-        return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+        return Token(
+            access_token=access_token, refresh_token=refresh_token, token_type="bearer"
+        )
 
     @staticmethod
     def generate_token(
@@ -385,4 +390,3 @@ class AuthService:
     ) -> Token:
         """Public method for backwards compatibility"""
         return AuthService._generate_token(user_id, expires_delta)
-

@@ -15,6 +15,7 @@ class UserCreate(UserBase):
 
 class UserCreateOAuth(BaseModel):
     """Schema for creating OAuth users (no password required)"""
+
     email: EmailStr
     full_name: Optional[str] = None
     auth_provider: str
@@ -37,18 +38,18 @@ class UserRead(UserBase):
     @classmethod
     def model_validate(cls, obj, *args, **kwargs):
         # Add has_password based on whether hashed_password exists
-        if hasattr(obj, 'hashed_password'):
+        if hasattr(obj, "hashed_password"):
             # Create a dict and add has_password
             data = {
-                'id': obj.id,
-                'email': obj.email,
-                'full_name': obj.full_name,
-                'auth_provider': obj.auth_provider,
-                'picture_url': obj.picture_url,
-                'is_active': obj.is_active,
-                'is_verified': obj.is_verified,
-                'has_password': bool(obj.hashed_password),
-                'created_at': obj.created_at,
+                "id": obj.id,
+                "email": obj.email,
+                "full_name": obj.full_name,
+                "auth_provider": obj.auth_provider,
+                "picture_url": obj.picture_url,
+                "is_active": obj.is_active,
+                "is_verified": obj.is_verified,
+                "has_password": bool(obj.hashed_password),
+                "created_at": obj.created_at,
             }
             return cls(**data)
         return super().model_validate(obj, *args, **kwargs)
@@ -62,4 +63,3 @@ class UserLogin(BaseModel):
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     picture_url: Optional[str] = None
-

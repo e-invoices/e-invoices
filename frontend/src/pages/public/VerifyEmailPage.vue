@@ -90,4 +90,3 @@ const goToHome = () => {
   router.push({ name: 'landing' })
 }
 </script>
-

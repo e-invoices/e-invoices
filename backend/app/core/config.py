@@ -68,7 +68,9 @@ class Settings:
     cors_origins: list[str] = field(
         default_factory=lambda: [
             origin.strip()
-            for origin in (_env_optional("CORS_ORIGINS") or "http://localhost:5173").split(",")
+            for origin in (
+                _env_optional("CORS_ORIGINS") or "http://localhost:5173"
+            ).split(",")
             if origin.strip()
         ]
     )

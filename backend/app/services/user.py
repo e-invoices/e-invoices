@@ -53,7 +53,12 @@ class UserService:
             select(user_models.User).where(user_models.User.email == normalized)
         )
         user = result.scalar_one_or_none()
-        logger.debug("Fetched user by email %s (normalized: %s) => %s", email, normalized, bool(user))
+        logger.debug(
+            "Fetched user by email %s (normalized: %s) => %s",
+            email,
+            normalized,
+            bool(user),
+        )
         return user
 
     async def get_by_google_id(self, google_id: str) -> Optional[user_models.User]:
@@ -104,7 +109,9 @@ class UserService:
         await self.session.commit()
         logger.debug("Updated last login for user %s", user.email)
 
-    async def set_password(self, user: user_models.User, hashed_password: str) -> UserRead:
+    async def set_password(
+        self, user: user_models.User, hashed_password: str
+    ) -> UserRead:
         """Set password for a user (typically OAuth users adding password login)"""
         user.hashed_password = hashed_password
         await self.session.commit()

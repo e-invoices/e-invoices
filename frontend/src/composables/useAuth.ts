@@ -220,4 +220,3 @@ declare global {
     }
   }
 }
-

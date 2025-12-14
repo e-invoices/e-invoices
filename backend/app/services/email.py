@@ -22,12 +22,12 @@ class EmailService:
     def _send_email(self, to_email: str, subject: str, html_content: str) -> bool:
         """Send an email using SMTP"""
         try:
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = self.email_from
-            msg['To'] = to_email
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = self.email_from
+            msg["To"] = to_email
 
-            html_part = MIMEText(html_content, 'html')
+            html_part = MIMEText(html_content, "html")
             msg.attach(html_part)
 
             with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
@@ -45,6 +45,7 @@ class EmailService:
     def generate_verification_token(self, user_id: int) -> str:
         """Generate a verification token for email verification"""
         from datetime import timedelta
+
         return create_access_token(user_id, expires_delta=timedelta(hours=24))
 
     def send_verification_email(
@@ -52,7 +53,7 @@ class EmailService:
         to_email: str,
         user_name: Optional[str],
         verification_token: str,
-        base_url: str = "http://localhost:5173"
+        base_url: str = "http://localhost:5173",
     ) -> bool:
         """Send email verification email"""
         verification_link = f"{base_url}/verify-email?token={verification_token}"
@@ -80,18 +81,18 @@ class EmailService:
                 <div class="content">
                     <h2>Добредојдовте, {name}!</h2>
                     <p>Ви благодариме што се регистриравте на e-Faktura. За да го завршите процесот на регистрација, ве молиме потврдете ја вашата е-пошта.</p>
-                    
+
                     <p style="text-align: center;">
                         <a href="{verification_link}" style="display: inline-block; background-color: #3b82f6; color: #ffffff !important; padding: 12px 30px; text-decoration: none; border-radius: 25px; margin: 20px 0; font-weight: bold;">Потврди е-пошта</a>
                     </p>
-                    
+
                     <p>Или копирајте го овој линк во вашиот прелистувач:</p>
                     <p style="word-break: break-all; color: #3b82f6;">{verification_link}</p>
-                    
+
                     <p>Овој линк важи 24 часа.</p>
-                    
+
                     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-                    
+
                     <p style="color: #64748b; font-size: 14px;">
                         Ако не сте се регистрирале на e-Faktura, можете да ја игнорирате оваа порака.
                     </p>
@@ -107,11 +108,7 @@ class EmailService:
         subject = "Потврдете ја вашата е-пошта - e-Faktura"
         return self._send_email(to_email, subject, html_content)
 
-    def send_welcome_email(
-        self,
-        to_email: str,
-        user_name: Optional[str]
-    ) -> bool:
+    def send_welcome_email(self, to_email: str, user_name: Optional[str]) -> bool:
         """Send welcome email after successful verification"""
         name = user_name or "User"
 
@@ -137,11 +134,11 @@ class EmailService:
                 <div class="content">
                     <h2>Добредојдовте на e-Faktura, {name}!</h2>
                     <p>Вашата сметка е успешно активирана. Сега можете да започнете со користење на платформата за електронски фактури.</p>
-                    
+
                     <p style="text-align: center;">
                         <a href="http://localhost:5173/app" class="button">Започни</a>
                     </p>
-                    
+
                     <p>Со e-Faktura можете:</p>
                     <ul>
                         <li>Да креирате електронски фактури усогласени со УЈП</li>
@@ -163,4 +160,3 @@ class EmailService:
 
 # Singleton instance
 email_service = EmailService()
-

@@ -79,4 +79,3 @@ export interface RegisterModalExposed {
   handleGoogleRegister: (response: GoogleCredentialResponse) => Promise<void>
   handleGoogleError: () => void
 }
-

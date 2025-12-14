@@ -37,5 +37,3 @@ export const authApi = {
   resendVerification: () =>
     api.post<{ message: string }>('/auth/resend-verification'),
 }
-
-

@@ -17,12 +17,18 @@ class User(Base):
 
     id: int = Column(Integer, primary_key=True, index=True)
     email: str = Column(String(255), unique=True, nullable=False, index=True)
-    hashed_password: Optional[str] = Column(String(255), nullable=True)  # Nullable for OAuth users
+    hashed_password: Optional[str] = Column(
+        String(255), nullable=True
+    )  # Nullable for OAuth users
     full_name: Optional[str] = Column(String(255), nullable=True)
 
     # OAuth fields
-    auth_provider: str = Column(String(50), default=AuthProvider.EMAIL.value, nullable=False)
-    google_id: Optional[str] = Column(String(255), unique=True, nullable=True, index=True)
+    auth_provider: str = Column(
+        String(50), default=AuthProvider.EMAIL.value, nullable=False
+    )
+    google_id: Optional[str] = Column(
+        String(255), unique=True, nullable=True, index=True
+    )
     picture_url: Optional[str] = Column(String(500), nullable=True)
 
     # Account status

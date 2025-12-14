@@ -238,4 +238,3 @@ defineExpose({ handleGoogleRegister, handleGoogleError })
     </Transition>
   </Teleport>
 </template>
-

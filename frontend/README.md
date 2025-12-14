@@ -66,4 +66,3 @@ docker-compose -f docker/docker-compose.yml down frontend && docker-compose -f d
 ```
 
 **Note:** Run these commands from the project root directory (`e-invoices/`).
-
