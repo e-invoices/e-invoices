@@ -9,6 +9,10 @@
     "preview": "Preview",
     "logout": "Log out"
   },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode"
+  },
   "auth": {
     "or": "or continue with email",
     "email": "Email",

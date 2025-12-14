@@ -5,9 +5,11 @@ import { computed, ref, onMounted, watch } from 'vue'
 import LoginModal from '@/components/auth/LoginModal.vue'
 import RegisterModal from '@/components/auth/RegisterModal.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
 import type { User } from '@/types/auth'
 
 const { t, locale } = useI18n()
+const { isDark, toggleTheme } = useTheme()
 const {
   showLoginModal,
   showRegisterModal,
@@ -94,14 +96,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 font-sans text-slate-800">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
     <!-- Header -->
-    <header class="bg-white shadow-sm">
+    <header class="bg-white dark:bg-slate-900 shadow-sm dark:shadow-slate-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 md:h-20">
           <!-- Logo -->
           <div class="flex-shrink-0 w-28 md:w-32">
-            <RouterLink to="/" class="text-xl md:text-2xl font-bold text-slate-900 no-underline">
+            <RouterLink to="/" class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white no-underline">
               e-Faktura
             </RouterLink>
           </div>
@@ -112,7 +114,7 @@ onMounted(async () => {
               v-for="item in menuItems"
               :key="item.path"
               :to="item.path"
-              class="min-w-[100px] text-center text-slate-500 hover:text-slate-900 font-medium transition-colors duration-200 no-underline whitespace-nowrap"
+              class="min-w-[100px] text-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium transition-colors duration-200 no-underline whitespace-nowrap"
             >
               {{ item.label }}
             </RouterLink>
@@ -120,9 +122,26 @@ onMounted(async () => {
 
           <!-- Desktop Right Section -->
           <div class="hidden md:flex items-center gap-4 lg:gap-6">
+            <!-- Theme Toggle -->
+            <button
+              @click="toggleTheme"
+              class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <!-- Sun icon (shown in dark mode) -->
+              <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <!-- Moon icon (shown in light mode) -->
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </button>
+
+            <!-- Language Toggle -->
             <button
               @click="toggleLanguage"
-              class="w-10 px-3 py-2 font-semibold text-slate-500 hover:text-slate-900 transition-colors duration-200 bg-transparent border-none cursor-pointer"
+              class="w-10 px-3 py-2 font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-200 bg-transparent border-none cursor-pointer"
             >
               {{ locale === 'mk' ? 'EN' : 'MK' }}
             </button>
@@ -131,7 +150,7 @@ onMounted(async () => {
             <div v-if="!isAuthenticated" class="flex items-center gap-3">
               <button
                 @click="openLogin"
-                class="min-w-[110px] text-center px-4 lg:px-6 py-2 border border-slate-200 text-slate-900 font-semibold rounded-full hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 bg-transparent cursor-pointer text-sm whitespace-nowrap"
+                class="min-w-[110px] text-center px-4 lg:px-6 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-transparent cursor-pointer text-sm whitespace-nowrap"
               >
                 {{ t('nav.login') }}
               </button>
@@ -145,10 +164,10 @@ onMounted(async () => {
 
             <!-- User menu when logged in -->
             <div v-else class="flex items-center gap-3">
-              <span class="text-sm text-slate-600">{{ user?.full_name || user?.email }}</span>
+              <span class="text-sm text-slate-600 dark:text-slate-400">{{ user?.full_name || user?.email }}</span>
               <button
                 @click="logout"
-                class="px-4 py-2 border border-slate-200 text-slate-900 font-semibold rounded-full hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 bg-transparent cursor-pointer text-sm"
+                class="px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-transparent cursor-pointer text-sm"
               >
                 {{ t('nav.logout') }}
               </button>
@@ -158,7 +177,7 @@ onMounted(async () => {
           <!-- Mobile Menu Button -->
           <button
             @click="toggleMobileMenu"
-            class="md:hidden p-2 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors duration-200 bg-transparent border-none cursor-pointer"
+            class="md:hidden p-2 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 bg-transparent border-none cursor-pointer"
           >
             <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -172,23 +191,38 @@ onMounted(async () => {
         <!-- Mobile Menu -->
         <div
           v-show="mobileMenuOpen"
-          class="md:hidden border-t border-slate-100 py-4"
+          class="md:hidden border-t border-slate-100 dark:border-slate-800 py-4"
         >
           <nav class="flex flex-col gap-2">
             <RouterLink
               v-for="item in menuItems"
               :key="item.path"
               :to="item.path"
-              class="px-3 py-2 text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200 no-underline"
+              class="px-3 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-medium transition-colors duration-200 no-underline"
               @click="mobileMenuOpen = false"
             >
               {{ item.label }}
             </RouterLink>
           </nav>
-          <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-3">
+          <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+            <!-- Theme Toggle for Mobile -->
+            <button
+              @click="toggleTheme"
+              class="flex items-center gap-2 px-3 py-2 text-left font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors duration-200 bg-transparent border-none cursor-pointer"
+            >
+              <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              {{ isDark ? t('theme.light') : t('theme.dark') }}
+            </button>
+
+            <!-- Language Toggle -->
             <button
               @click="toggleLanguage"
-              class="px-3 py-2 text-left font-semibold text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors duration-200 bg-transparent border-none cursor-pointer"
+              class="px-3 py-2 text-left font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors duration-200 bg-transparent border-none cursor-pointer"
             >
               {{ locale === 'mk' ? 'Switch to English' : 'Премини на Македонски' }}
             </button>
@@ -197,7 +231,7 @@ onMounted(async () => {
             <div v-if="!isAuthenticated" class="flex flex-col gap-2 px-3">
               <button
                 @click="handleMobileLogin"
-                class="w-full text-center px-4 py-2 border border-slate-200 text-slate-900 font-semibold rounded-full hover:bg-slate-50 transition-all duration-200 bg-transparent cursor-pointer text-sm"
+                class="w-full text-center px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 bg-transparent cursor-pointer text-sm"
               >
                 {{ t('nav.login') }}
               </button>
@@ -211,10 +245,10 @@ onMounted(async () => {
 
             <!-- Mobile user menu -->
             <div v-else class="flex flex-col gap-2 px-3">
-              <span class="text-sm text-slate-600 py-2">{{ user?.full_name || user?.email }}</span>
+              <span class="text-sm text-slate-600 dark:text-slate-400 py-2">{{ user?.full_name || user?.email }}</span>
               <button
                 @click="handleMobileLogout"
-                class="w-full text-center px-4 py-2 border border-slate-200 text-slate-900 font-semibold rounded-full hover:bg-slate-50 transition-all duration-200 bg-transparent cursor-pointer text-sm"
+                class="w-full text-center px-4 py-2 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-semibold rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-200 bg-transparent cursor-pointer text-sm"
               >
                 {{ t('nav.logout') }}
               </button>
@@ -230,9 +264,9 @@ onMounted(async () => {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 mt-12 md:mt-16">
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-12 md:mt-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 text-center">
-        <p class="text-slate-500 text-sm md:text-base">{{ t('footer.rights') }}</p>
+        <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base">{{ t('footer.rights') }}</p>
       </div>
     </footer>
 

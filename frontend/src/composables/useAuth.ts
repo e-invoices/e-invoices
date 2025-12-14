@@ -114,7 +114,7 @@ export function useAuth() {
 
   // Load Google SDK script
   const loadGoogleScript = () => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       if (window.google?.accounts?.id) {
         isGoogleLoaded.value = true
         resolve()
@@ -142,7 +142,6 @@ export function useAuth() {
       script.onerror = () => {
         // Google SDK failed to load - not critical, user can still use email login
         console.warn('Google Sign-In SDK failed to load. Email login still available.')
-        isGoogleLoaded.value = false
         resolve() // Don't reject - app should still work
       }
       document.head.appendChild(script)
