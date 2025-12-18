@@ -5,10 +5,12 @@ import type {
   LoginRequest,
   RegisterRequest,
   GoogleAuthRequest,
-  SetPasswordRequest,
-  ChangePasswordRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
   SwitchOrganizationRequest,
-  SwitchOrganizationResponse
+  SwitchOrganizationResponse,
+  UpdateProfileRequest,
+  LinkGoogleRequest
 } from '@/types/auth'
 
 export const authApi = {
@@ -27,11 +29,23 @@ export const authApi = {
   logout: () =>
     api.post<void>('/auth/logout'),
 
-  setPassword: (data: SetPasswordRequest) =>
-    api.post<User>('/auth/set-password', data),
+  // Request password reset email (for unauthenticated users - forgot password)
+  forgotPassword: (data: ForgotPasswordRequest) =>
+    api.post<{ message: string }>('/auth/forgot-password', data),
 
-  changePassword: (data: ChangePasswordRequest) =>
-    api.post<User>('/auth/change-password', data),
+  // Request password reset email (for authenticated users - set/change password)
+  requestPasswordReset: () =>
+    api.post<{ message: string }>('/auth/request-password-reset'),
+
+  // Reset password using token from email
+  resetPassword: (data: ResetPasswordRequest) =>
+    api.post<User>('/auth/reset-password', data),
+
+  updateProfile: (data: UpdateProfileRequest) =>
+    api.put<User>('/auth/profile', data),
+
+  linkGoogle: (data: LinkGoogleRequest) =>
+    api.post<User>('/auth/link-google', data),
 
   verifyEmail: (token: string) =>
     api.post<User>(`/auth/verify-email?token=${encodeURIComponent(token)}`),

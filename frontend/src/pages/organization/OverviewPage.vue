@@ -28,7 +28,7 @@ const orgContactPhone = computed(() => organizationData.value?.contact_phone ?? 
 const loadOrganization = async () => {
   const orgId = localStorage.getItem('selected_organization_id')
   if (!orgId) {
-    await router.push('/app/organizations')
+    await router.push('/organization')
     return
   }
 
@@ -44,7 +44,7 @@ const loadOrganization = async () => {
     organizationData.value = await organizationApi.getOrganization(parseInt(orgId))
   } catch {
     // If organization not found, redirect to selection
-    await router.push('/app/organizations')
+    await router.push('/organization')
   } finally {
     loading.value = false
   }

@@ -4,15 +4,17 @@ from app.core.security import get_user_context
 from app.db.session import get_session
 from app.schemas.auth import (
     AuthResponse,
-    ChangePasswordRequest,
+    ForgotPasswordRequest,
     GoogleAuthRequest,
+    LinkGoogleRequest,
     LoginRequest,
     RefreshTokenRequest,
     RegisterRequest,
-    SetPasswordRequest,
+    ResetPasswordRequest,
     SwitchOrganizationRequest,
     SwitchOrganizationResponse,
     Token,
+    UpdateProfileRequest,
     UserContext,
 )
 from app.schemas.user import UserRead
@@ -67,35 +69,63 @@ async def get_current_user(
     return await auth_service.get_current_user(ctx.user_id)
 
 
-@router.post("/set-password", response_model=UserRead)
-async def set_password(
-    payload: SetPasswordRequest,
+@router.post("/forgot-password")
+async def forgot_password(
+    payload: ForgotPasswordRequest,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Request password reset email (for users who forgot their password)"""
+    auth_service = AuthService(session)
+    logger.debug("Forgot password request for email=%s", payload.email)
+    return await auth_service.request_password_reset(str(payload.email))
+
+
+@router.post("/request-password-reset")
+async def request_password_reset(
     ctx: UserContext = Depends(get_user_context),
     session: AsyncSession = Depends(get_session),
-) -> UserRead:
-    """Set password for OAuth users who want to add email/password login"""
+) -> dict:
+    """Request password reset email for authenticated user (set or change password)"""
     auth_service = AuthService(session)
-    logger.debug("Set password request for user_id=%s", ctx.user_id)
-    return await auth_service.set_password(
-        ctx.user_id, payload.password, payload.confirm_password
+    logger.debug("Password reset request for user_id=%s", ctx.user_id)
+    return await auth_service.request_password_reset_authenticated(ctx.user_id)
+
+
+@router.post("/reset-password", response_model=UserRead)
+async def reset_password(
+    payload: ResetPasswordRequest,
+    session: AsyncSession = Depends(get_session),
+) -> UserRead:
+    """Reset password using token from email"""
+    auth_service = AuthService(session)
+    logger.debug("Reset password request")
+    return await auth_service.reset_password(
+        payload.token, payload.password, payload.confirm_password
     )
 
 
-@router.post("/change-password", response_model=UserRead)
-async def change_password(
-    payload: ChangePasswordRequest,
+@router.put("/profile", response_model=UserRead)
+async def update_profile(
+    payload: UpdateProfileRequest,
     ctx: UserContext = Depends(get_user_context),
     session: AsyncSession = Depends(get_session),
 ) -> UserRead:
-    """Change password for users with existing password"""
+    """Update current user's profile"""
     auth_service = AuthService(session)
-    logger.debug("Change password request for user_id=%s", ctx.user_id)
-    return await auth_service.change_password(
-        ctx.user_id,
-        payload.current_password,
-        payload.new_password,
-        payload.confirm_password,
-    )
+    logger.debug("Update profile request for user_id=%s", ctx.user_id)
+    return await auth_service.update_profile(ctx.user_id, payload.full_name)
+
+
+@router.post("/link-google", response_model=UserRead)
+async def link_google(
+    payload: LinkGoogleRequest,
+    ctx: UserContext = Depends(get_user_context),
+    session: AsyncSession = Depends(get_session),
+) -> UserRead:
+    """Link Google account to existing user"""
+    auth_service = AuthService(session)
+    logger.debug("Link Google request for user_id=%s", ctx.user_id)
+    return await auth_service.link_google(ctx.user_id, payload.credential)
 
 
 @router.post("/verify-email", response_model=UserRead)

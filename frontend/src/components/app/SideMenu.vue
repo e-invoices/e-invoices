@@ -19,7 +19,7 @@ const route = useRoute()
 const menuItems = computed(() => [
   {
     label: t('nav.overview'),
-    path: '/app/overview',
+    path: '/organization/overview',
     icon: 'home',
   },
 ])

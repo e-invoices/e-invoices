@@ -69,20 +69,19 @@ class GoogleUserInfo(BaseModel):
     picture: Optional[str] = None
 
 
-class SetPasswordRequest(BaseModel):
-    """Request to set password for OAuth users"""
+class ForgotPasswordRequest(BaseModel):
+    """Request to initiate password reset via email"""
 
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """Request to reset password using token from email"""
+
+    token: str
     password: str = Field(
         ..., min_length=8, description="Password must be at least 8 characters"
     )
-    confirm_password: str = Field(..., min_length=8)
-
-
-class ChangePasswordRequest(BaseModel):
-    """Request to change password for existing password users"""
-
-    current_password: str
-    new_password: str = Field(..., min_length=8)
     confirm_password: str = Field(..., min_length=8)
 
 
@@ -100,6 +99,18 @@ class SwitchOrganizationResponse(BaseModel):
     token_type: str = "bearer"
     organization_id: int
     role: str
+
+
+class UpdateProfileRequest(BaseModel):
+    """Request to update user profile"""
+
+    full_name: Optional[str] = Field(None, min_length=1, max_length=255)
+
+
+class LinkGoogleRequest(BaseModel):
+    """Request to link Google account to existing user"""
+
+    credential: str = Field(..., description="Google ID token (JWT)")
 
 
 class UserContext(BaseModel):

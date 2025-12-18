@@ -35,36 +35,54 @@ const routes = [
         name: 'verify-email',
         component: () => import('@/pages/public/VerifyEmailPage.vue'),
       },
+      {
+        path: 'reset-password',
+        name: 'reset-password',
+        component: () => import('@/pages/public/ResetPasswordPage.vue'),
+      },
     ],
   },
-  // App routes (authenticated) - organization selection/creation uses PublicLayout
+  // Account routes (authenticated, no org context)
   {
-    path: '/app',
+    path: '/account',
     component: () => import('@/layouts/PublicLayout.vue'),
     children: [
       {
-        path: 'organizations',
-        name: 'organization-select',
-        component: () => import('@/pages/public/OrganizationSelectPage.vue'),
-        meta: { requiresAuth: true },
-      },
-      {
-        path: 'organization/create',
-        name: 'organization-create',
-        component: () => import('@/pages/public/OrganizationCreatePage.vue'),
+        path: 'settings',
+        name: 'account-settings',
+        component: () => import('@/pages/account/SettingsPage.vue'),
         meta: { requiresAuth: true },
       },
     ],
   },
-  // App routes (authenticated) - main app with sidebar uses AppLayout
+  // Organization selection/creation (authenticated, no org context)
   {
-    path: '/app',
-    component: () => import('@/layouts/AppLayout.vue'),
+    path: '/organization',
+    component: () => import('@/layouts/PublicLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'organization-select',
+        component: () => import('@/pages/organization/SelectPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'create',
+        name: 'organization-create',
+        component: () => import('@/pages/organization/CreatePage.vue'),
+        meta: { requiresAuth: true },
+      },
+    ],
+  },
+  // Organization app routes (authenticated, with org context and sidebar)
+  {
+    path: '/organization',
+    component: () => import('@/layouts/OrganizationLayout.vue'),
     children: [
       {
         path: 'overview',
-        name: 'overview',
-        component: () => import('@/pages/app/OverviewPage.vue'),
+        name: 'organization-overview',
+        component: () => import('@/pages/organization/OverviewPage.vue'),
         meta: { requiresAuth: true },
       },
     ],

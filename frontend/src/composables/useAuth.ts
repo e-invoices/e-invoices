@@ -60,7 +60,7 @@ export function useAuth() {
     }
     closeModals()
     // Redirect to organization selection
-    window.location.href = '/app/organizations'
+    window.location.href = '/organization'
   }
 
   const handleRegisterSuccess = (data: AuthResponse) => {
@@ -74,7 +74,7 @@ export function useAuth() {
     }
     closeModals()
     // Redirect to organization selection
-    window.location.href = '/app/organizations'
+    window.location.href = '/organization'
   }
 
   const logout = () => {

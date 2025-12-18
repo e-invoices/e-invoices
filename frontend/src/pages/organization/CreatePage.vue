@@ -1,15 +1,40 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { organizationApi, type OrganizationCreate } from '@/api/v1/organization.ts'
 import { authApi } from '@/api/v1/auth.ts'
+import { useAuth } from '@/composables/useAuth'
 
 const { t } = useI18n()
 const router = useRouter()
+const { currentUser, checkSession } = useAuth()
 
 const loading = ref(false)
 const error = ref('')
+const resendingVerification = ref(false)
+const verificationEmailSent = ref(false)
+
+// Check if user is verified
+const isUserVerified = computed(() => currentUser.value?.is_verified ?? false)
+
+// Resend verification email
+const resendVerificationEmail = async () => {
+  resendingVerification.value = true
+  try {
+    await authApi.resendVerification()
+    verificationEmailSent.value = true
+  } catch (err) {
+    console.error('Failed to resend verification email:', err)
+  } finally {
+    resendingVerification.value = false
+  }
+}
+
+onMounted(async () => {
+  // Refresh user data to get latest verification status
+  await checkSession()
+})
 
 const form = ref<OrganizationCreate>({
   company_name: '',
@@ -187,7 +212,7 @@ const handleSubmit = async () => {
     localStorage.setItem('refresh_token', switchResponse.refresh_token)
     localStorage.setItem('selected_organization_id', organization.id.toString())
 
-    await router.push('/app/overview')
+    await router.push('/organization/overview')
   } catch (err) {
     error.value = (err as Error).message || t('organization.create.createFailed')
   } finally {
@@ -196,7 +221,7 @@ const handleSubmit = async () => {
 }
 
 const goBack = () => {
-  router.push('/app/organizations')
+  router.push('/organization')
 }
 </script>
 
@@ -214,6 +239,40 @@ const goBack = () => {
         </svg>
         <span>{{ t('common.back') }}</span>
       </button>
+
+      <!-- Email Verification Warning -->
+      <div v-if="!isUserVerified" class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-1">
+              {{ t('organization.create.verificationRequired') }}
+            </h3>
+            <p class="text-amber-700 dark:text-amber-300 mb-4">
+              {{ t('organization.create.verificationMessage') }}
+            </p>
+            <div v-if="verificationEmailSent" class="mb-3 p-3 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+              <p class="text-green-700 dark:text-green-300 text-sm">
+                {{ t('organization.create.verificationEmailSent') }}
+              </p>
+            </div>
+            <button
+              type="button"
+              @click="resendVerificationEmail"
+              :disabled="resendingVerification || verificationEmailSent"
+              class="px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white font-medium rounded-lg transition-colors"
+            >
+              <span v-if="resendingVerification">{{ t('common.loading') }}</span>
+              <span v-else-if="verificationEmailSent">{{ t('organization.create.emailSent') }}</span>
+              <span v-else>{{ t('organization.create.resendEmail') }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Hero Section -->
       <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 sm:p-8 mb-6">
@@ -426,7 +485,7 @@ const goBack = () => {
           </button>
           <button
             type="submit"
-            :disabled="loading"
+            :disabled="loading || !isUserVerified"
             class="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <span v-if="loading" class="flex items-center justify-center gap-2">

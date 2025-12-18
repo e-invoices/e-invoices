@@ -105,9 +105,11 @@ class UserOrganization(Base):
     is_active: bool = Column(Boolean, default=True, nullable=False)
 
     # Relationships
-    user = relationship("User", foreign_keys=[user_id], back_populates="organizations")
+    user = relationship(
+        "User", foreign_keys="UserOrganization.user_id", back_populates="organizations"
+    )
     organization = relationship("Organization", back_populates="members")
-    inviter = relationship("User", foreign_keys=[invited_by])
+    inviter = relationship("User", foreign_keys="UserOrganization.invited_by")
 
 
 class OrganizationInvitation(Base):
@@ -156,7 +158,7 @@ class OrganizationInvitation(Base):
 
     # Relationships
     organization = relationship("Organization", back_populates="invitations")
-    creator = relationship("User", foreign_keys=[created_by])
+    creator = relationship("User", foreign_keys="OrganizationInvitation.created_by")
 
     @staticmethod
     def generate_code() -> str:

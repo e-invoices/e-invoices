@@ -5,11 +5,11 @@ import AppFooter from '@/components/app/AppFooter.vue'
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
+  <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200">
     <PublicNavbar />
 
     <!-- Main Content -->
-    <main>
+    <main class="flex-1 flex flex-col">
       <RouterView />
     </main>
 

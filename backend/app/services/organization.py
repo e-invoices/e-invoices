@@ -50,7 +50,7 @@ class OrganizationService:
         user_org = UserOrganization(
             user_id=owner_id,
             organization_id=organization.id,
-            role=OrganizationRole.OWNER.value,
+            role=OrganizationRole.OWNER,
         )
         db.add(user_org)
         await db.commit()

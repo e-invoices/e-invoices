@@ -10,6 +10,67 @@
     "preview": "Parashiko",
     "logout": "Dilni"
   },
+  "profile": {
+    "accountSettings": "Cilësimet e llogarisë",
+    "switchOrganization": "Ndrysho organizatën"
+  },
+  "account": {
+    "settings": {
+      "title": "Cilësimet e llogarisë",
+      "subtitle": "Menaxhoni cilësimet tuaja personale",
+      "profile": "Profili",
+      "security": "Siguria",
+      "comingSoon": "Redaktimi i profilit po vjen së shpejti. Tani për tani, mund të shikoni informacionet tuaja.",
+      "password": "Fjalëkalimi",
+      "passwordSet": "Fjalëkalimi juaj është vendosur",
+      "passwordNotSet": "Nuk ka fjalëkalim të vendosur (duke përdorur Google)",
+      "changePassword": "Ndrysho",
+      "setPassword": "Vendos fjalëkalimin",
+      "connectedAccounts": "Llogaritë e lidhura",
+      "googleConnected": "I kyçur me Google",
+      "emailOnly": "Vetëm me email",
+      "connected": "E lidhur",
+      "editProfile": "Ndrysho profilin",
+      "fullName": "Emri i plotë",
+      "fullNamePlaceholder": "Vendosni emrin tuaj të plotë",
+      "email": "Email",
+      "emailHint": "Emaili nuk mund të ndryshohet",
+      "saveChanges": "Ruaj ndryshimet",
+      "saving": "Duke ruajtur...",
+      "profileUpdated": "Profili u përditësua me sukses",
+      "profileUpdateFailed": "Përditësimi i profilit dështoi",
+      "changePasswordTitle": "Ndrysho fjalëkalimin",
+      "currentPassword": "Fjalëkalimi aktual",
+      "currentPasswordPlaceholder": "Vendosni fjalëkalimin aktual",
+      "newPassword": "Fjalëkalimi i ri",
+      "newPasswordPlaceholder": "Vendosni fjalëkalimin e ri",
+      "confirmPassword": "Konfirmo fjalëkalimin e ri",
+      "confirmPasswordPlaceholder": "Konfirmoni fjalëkalimin e ri",
+      "passwordChanged": "Fjalëkalimi u ndryshua me sukses",
+      "passwordChangeFailed": "Ndryshimi i fjalëkalimit dështoi",
+      "passwordResetEmailSent": "Email për rivendosjen e fjalëkalimit u dërgua! Kontrolloni kutinë tuaj.",
+      "passwordResetFailed": "Dërgimi i emailit për rivendosje dështoi",
+      "setPasswordTitle": "Vendos fjalëkalimin",
+      "setPasswordDescription": "Shtoni një fjalëkalim që të mund të kyçeni edhe me email.",
+      "passwordSetSuccess": "Fjalëkalimi u vendos me sukses",
+      "passwordSetFailed": "Vendosja e fjalëkalimit dështoi",
+      "connectGoogle": "Lidhu me Google",
+      "connectGoogleDescription": "Lidhni llogarinë tuaj Google për kyçje më të lehtë",
+      "googleLinked": "Llogaria Google u lidh me sukses",
+      "googleLinkFailed": "Lidhja me Google dështoi",
+      "googleAlreadyLinked": "Kjo llogari Google është e lidhur me një përdorues tjetër",
+      "cancel": "Anulo",
+      "errors": {
+        "fullNameRequired": "Emri i plotë është i detyrueshëm",
+        "currentPasswordRequired": "Fjalëkalimi aktual është i detyrueshëm",
+        "newPasswordRequired": "Fjalëkalimi i ri është i detyrueshëm",
+        "confirmPasswordRequired": "Ju lutemi konfirmoni fjalëkalimin tuaj",
+        "passwordMismatch": "Fjalëkalimet nuk përputhen",
+        "passwordTooShort": "Fjalëkalimi duhet të ketë të paktën 8 karaktere",
+        "incorrectPassword": "Fjalëkalimi aktual është i pasaktë"
+      }
+    }
+  },
   "theme": {
     "light": "Tema e ndritshme",
     "dark": "Tema e errët"
@@ -28,6 +89,10 @@
     "fullName": "Emri i plotë",
     "fullNamePlaceholder": "Filan Fisteku",
     "forgotPassword": "Keni harruar fjalëkalimin?",
+    "forgotPasswordSubtitle": "Vendosni emailin tuaj dhe do t'ju dërgojmë një link për rivendosje",
+    "sendResetLink": "Dërgo linkun",
+    "forgotPasswordSuccess": "Nëse ekziston një llogari me këtë email, do të merrni një link për rivendosjen e fjalëkalimit.",
+    "backToLogin": "Kthehu te kyçja",
     "loading": "Ju lutemi prisni...",
     "login": {
       "title": "Mirë se u kthyet",
@@ -54,7 +119,8 @@
       "googleRegisterFailed": "Regjistrimi me Google dështoi. Provoni përsëri.",
       "passwordMismatch": "Fjalëkalimet nuk përputhen",
       "passwordTooShort": "Fjalëkalimi duhet të ketë të paktën 8 karaktere",
-      "acceptTerms": "Duhet të pranoni kushtet e përdorimit"
+      "acceptTerms": "Duhet të pranoni kushtet e përdorimit",
+      "forgotPasswordFailed": "Dërgimi i emailit dështoi. Provoni përsëri."
     }
   },
   "landing": {
@@ -125,6 +191,28 @@
     "genericError": "Verifikimi i emailit dështoi. Linku mund të ketë skaduar.",
     "homeButton": "Shko në fillim"
   },
+  "resetPassword": {
+    "title": "Rivendos fjalëkalimin",
+    "subtitle": "Vendosni fjalëkalimin tuaj të ri më poshtë",
+    "newPassword": "Fjalëkalimi i ri",
+    "newPasswordPlaceholder": "Vendosni fjalëkalimin e ri",
+    "confirmPassword": "Konfirmo fjalëkalimin",
+    "confirmPasswordPlaceholder": "Konfirmoni fjalëkalimin e ri",
+    "submitButton": "Rivendos fjalëkalimin",
+    "successTitle": "Fjalëkalimi u rivendos!",
+    "successMessage": "Fjalëkalimi juaj u rivendos me sukses. Tani mund të kyçeni me fjalëkalimin tuaj të ri.",
+    "loginButton": "Shko te kyçja",
+    "errorTitle": "Rivendosja dështoi",
+    "noToken": "Nuk u dha token rivendosjeje. Ju lutemi kërkoni një link të ri për rivendosje.",
+    "homeButton": "Shko në fillim",
+    "errors": {
+      "passwordRequired": "Fjalëkalimi është i detyrueshëm",
+      "passwordTooShort": "Fjalëkalimi duhet të ketë të paktën 8 karaktere",
+      "confirmPasswordRequired": "Ju lutemi konfirmoni fjalëkalimin tuaj",
+      "passwordMismatch": "Fjalëkalimet nuk përputhen",
+      "resetFailed": "Rivendosja e fjalëkalimit dështoi. Linku mund të ketë skaduar."
+    }
+  },
   "common": {
     "back": "Kthehu",
     "retry": "Provo përsëri",
@@ -174,6 +262,11 @@
       "eyebrow": "Regjistrimi i Organizatës",
       "title": "Vendosni të dhënat e kompanisë suaj",
       "subtitle": "Ju ndihmojmë të lidhni certifikatat, rregulloret tatimore dhe sistemin ERP në një proces të sigurt.",
+      "verificationRequired": "Kërkohet verifikimi i emailit",
+      "verificationMessage": "Duhet të verifikoni adresën tuaj të emailit para se të krijoni organizatën. Kontrolloni kutinë tuaj për emailin e verifikimit.",
+      "verificationEmailSent": "Emaili i verifikimit u dërgua! Kontrolloni kutinë tuaj.",
+      "resendEmail": "Ridërgo emailin",
+      "emailSent": "U dërgua",
       "infoTitle": "Çfarë do t'ju duhet",
       "infoItem1": "Të dhëna nga Regjistri Qendror (NUI, emri i regjistruar)",
       "infoItem2": "Personi kontaktues i financave (emri, emaili, telefoni)",

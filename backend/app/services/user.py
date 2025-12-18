@@ -141,6 +141,10 @@ class UserService:
             user.picture_url = picture_url
         if full_name and not user.full_name:
             user.full_name = full_name
+        # Mark as verified since Google has verified the email
+        if not user.is_verified:
+            user.is_verified = True
+            logger.info("User %s auto-verified via Google OAuth", user.email)
         await self.session.commit()
         await self.session.refresh(user)
         logger.debug("Updated OAuth info for user %s", user.email)

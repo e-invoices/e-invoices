@@ -18,6 +18,7 @@ from app.schemas.organization import (
     UserOrganizationsResponse,
 )
 from app.services.organization import organization_service
+from app.services.user import UserService
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,6 +35,15 @@ async def create_organization(
     session: AsyncSession = Depends(get_session),
 ) -> OrganizationResponse:
     """Create a new organization. The creator becomes the owner."""
+    # Check if user's email is verified
+    user_service = UserService(session)
+    user = await user_service.get_by_id(ctx.user_id)
+    if not user or not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Мора да ја потврдите вашата е-пошта пред да креирате организација.",
+        )
+
     # Check if organization with same EDB already exists
     existing = await organization_service.get_organization_by_edb(session, data.edb)
     if existing:

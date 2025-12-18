@@ -30,11 +30,12 @@ def create_access_token(
     expires_delta: Optional[timedelta] = None,
     organization_id: Optional[int] = None,
     organization_role: Optional[str] = None,
+    token_type: str = "access",
 ) -> str:
     expire = datetime.now(UTC) + (
         expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
     )
-    to_encode: dict[str, Any] = {"sub": str(subject), "exp": expire, "type": "access"}
+    to_encode: dict[str, Any] = {"sub": str(subject), "exp": expire, "type": token_type}
 
     # Add organization context if provided
     if organization_id is not None:

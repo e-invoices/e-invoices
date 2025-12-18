@@ -48,6 +48,126 @@ class EmailService:
 
         return create_access_token(user_id, expires_delta=timedelta(hours=24))
 
+    def generate_password_reset_token(self, user_id: int) -> str:
+        """Generate a token for password reset (valid for 1 hour)"""
+        from datetime import timedelta
+
+        # Create a special token with password_reset type
+        return create_access_token(
+            user_id, expires_delta=timedelta(hours=1), token_type="password_reset"
+        )
+
+    def send_password_reset_email(
+        self,
+        to_email: str,
+        user_name: Optional[str],
+        reset_token: str,
+        base_url: str = "http://localhost:5173",
+    ) -> bool:
+        """Send password reset email"""
+        reset_link = f"{base_url}/reset-password?token={reset_token}"
+
+        name = user_name or "Корисник"
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+                .content {{ background-color: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }}
+                .footer {{ text-align: center; color: #64748b; font-size: 12px; margin-top: 20px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>e-Faktura</h1>
+                </div>
+                <div class="content">
+                    <h2>Ресетирање на лозинка</h2>
+                    <p>Здраво {name},</p>
+                    <p>Добивме барање за ресетирање на вашата лозинка. Кликнете на копчето подолу за да поставите нова лозинка:</p>
+
+                    <p style="text-align: center;">
+                        <a href="{reset_link}" style="display: inline-block; background-color: #3b82f6; color: #ffffff !important; padding: 12px 30px; text-decoration: none; border-radius: 25px; margin: 20px 0; font-weight: bold;">Ресетирај лозинка</a>
+                    </p>
+
+                    <p>Или копирајте го овој линк во вашиот прелистувач:</p>
+                    <p style="word-break: break-all; color: #3b82f6;">{reset_link}</p>
+
+                    <p><strong>Овој линк важи само 1 час.</strong></p>
+
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+                    <p style="color: #64748b; font-size: 14px;">
+                        Ако не сте го побарале ова ресетирање, можете безбедно да ја игнорирате оваа порака. Вашата лозинка нема да биде променета.
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>© 2025 e-Faktura. Сите права се задржани.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        subject = "Ресетирање на лозинка - e-Faktura"
+        return self._send_email(to_email, subject, html_content)
+
+    def send_password_changed_email(
+        self,
+        to_email: str,
+        user_name: Optional[str],
+    ) -> bool:
+        """Send confirmation email after password was changed"""
+        name = user_name or "Корисник"
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+                .content {{ background-color: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }}
+                .footer {{ text-align: center; color: #64748b; font-size: 12px; margin-top: 20px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>e-Faktura</h1>
+                </div>
+                <div class="content">
+                    <h2>Лозинката е променета</h2>
+                    <p>Здраво {name},</p>
+                    <p>Вашата лозинка беше успешно променета.</p>
+
+                    <p>Ако не сте ја направиле оваа промена, ве молиме веднаш контактирајте не.</p>
+
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+                    <p style="color: #64748b; font-size: 14px;">
+                        За безбедносни причини, ви препорачуваме да користите уникатна лозинка за секоја сметка.
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>© 2025 e-Faktura. Сите права се задржани.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        subject = "Лозинката е променета - e-Faktura"
+        return self._send_email(to_email, subject, html_content)
+
     def send_verification_email(
         self,
         to_email: str,

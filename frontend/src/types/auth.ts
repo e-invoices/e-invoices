@@ -35,15 +35,22 @@ export interface GoogleAuthRequest {
 }
 
 // Password management
-export interface SetPasswordRequest {
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface ResetPasswordRequest {
+  token: string
   password: string
   confirm_password: string
 }
 
-export interface ChangePasswordRequest {
-  current_password: string
-  new_password: string
-  confirm_password: string
+export interface UpdateProfileRequest {
+  full_name?: string
+}
+
+export interface LinkGoogleRequest {
+  credential: string
 }
 
 // Google OAuth types

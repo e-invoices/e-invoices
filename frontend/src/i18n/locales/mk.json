@@ -10,6 +10,67 @@
     "preview": "Преглед",
     "logout": "Одјави се"
   },
+  "profile": {
+    "accountSettings": "Поставки на профил",
+    "switchOrganization": "Смени организација"
+  },
+  "account": {
+    "settings": {
+      "title": "Поставки на профил",
+      "subtitle": "Управувајте со вашите лични поставки",
+      "profile": "Профил",
+      "security": "Безбедност",
+      "comingSoon": "Уредувањето на профилот наскоро. Засега можете да ги прегледате вашите информации.",
+      "password": "Лозинка",
+      "passwordSet": "Вашата лозинка е поставена",
+      "passwordNotSet": "Нема поставено лозинка (користите Google најава)",
+      "changePassword": "Промени",
+      "setPassword": "Постави лозинка",
+      "connectedAccounts": "Поврзани сметки",
+      "googleConnected": "Најавени со Google",
+      "emailOnly": "Само преку е-пошта",
+      "connected": "Поврзано",
+      "editProfile": "Уреди профил",
+      "fullName": "Целосно име",
+      "fullNamePlaceholder": "Внесете го вашето целосно име",
+      "email": "Е-пошта",
+      "emailHint": "Е-поштата не може да се менува",
+      "saveChanges": "Зачувај промени",
+      "saving": "Се зачувува...",
+      "profileUpdated": "Профилот е успешно ажуриран",
+      "profileUpdateFailed": "Неуспешно ажурирање на профилот",
+      "changePasswordTitle": "Промени лозинка",
+      "currentPassword": "Тековна лозинка",
+      "currentPasswordPlaceholder": "Внесете тековна лозинка",
+      "newPassword": "Нова лозинка",
+      "newPasswordPlaceholder": "Внесете нова лозинка",
+      "confirmPassword": "Потврди нова лозинка",
+      "confirmPasswordPlaceholder": "Потврдете нова лозинка",
+      "passwordChanged": "Лозинката е успешно променета",
+      "passwordChangeFailed": "Неуспешна промена на лозинката",
+      "passwordResetEmailSent": "Испратена е е-пошта за ресетирање на лозинката! Проверете го вашето сандаче.",
+      "passwordResetFailed": "Неуспешно испраќање на е-пошта за ресетирање",
+      "setPasswordTitle": "Постави лозинка",
+      "setPasswordDescription": "Додадете лозинка за да можете да се најавите и со е-пошта.",
+      "passwordSetSuccess": "Лозинката е успешно поставена",
+      "passwordSetFailed": "Неуспешно поставување на лозинката",
+      "connectGoogle": "Поврзи со Google",
+      "connectGoogleDescription": "Поврзете ја вашата Google сметка за полесна најава",
+      "googleLinked": "Google сметката е успешно поврзана",
+      "googleLinkFailed": "Неуспешно поврзување со Google",
+      "googleAlreadyLinked": "Оваа Google сметка е веќе поврзана со друг корисник",
+      "cancel": "Откажи",
+      "errors": {
+        "fullNameRequired": "Целосното име е задолжително",
+        "currentPasswordRequired": "Тековната лозинка е задолжителна",
+        "newPasswordRequired": "Новата лозинка е задолжителна",
+        "confirmPasswordRequired": "Ве молиме потврдете ја лозинката",
+        "passwordMismatch": "Лозинките не се совпаѓаат",
+        "passwordTooShort": "Лозинката мора да има најмалку 8 карактери",
+        "incorrectPassword": "Тековната лозинка е неточна"
+      }
+    }
+  },
   "theme": {
     "light": "Светла тема",
     "dark": "Темна тема"
@@ -28,6 +89,10 @@
     "fullName": "Целосно име",
     "fullNamePlaceholder": "Иван Петров",
     "forgotPassword": "Заборавена лозинка?",
+    "forgotPasswordSubtitle": "Внесете ја вашата е-пошта и ќе ви испратиме линк за ресетирање",
+    "sendResetLink": "Испрати линк",
+    "forgotPasswordSuccess": "Ако постои сметка со оваа е-пошта, ќе добиете линк за ресетирање на лозинката.",
+    "backToLogin": "Назад на најава",
     "loading": "Ве молиме почекајте...",
     "login": {
       "title": "Добредојдовте назад",
@@ -54,7 +119,8 @@
       "googleRegisterFailed": "Google регистрацијата не успеа. Обидете се повторно.",
       "passwordMismatch": "Лозинките не се совпаѓаат",
       "passwordTooShort": "Лозинката мора да има најмалку 8 карактери",
-      "acceptTerms": "Мора да ги прифатите условите за користење"
+      "acceptTerms": "Мора да ги прифатите условите за користење",
+      "forgotPasswordFailed": "Неуспешно испраќање на е-пошта. Обидете се повторно."
     }
   },
   "landing": {
@@ -125,6 +191,28 @@
     "genericError": "Не успеа потврдувањето на е-поштата. Линкот можеби е истечен.",
     "homeButton": "Оди на почетна"
   },
+  "resetPassword": {
+    "title": "Ресетирај лозинка",
+    "subtitle": "Внесете ја вашата нова лозинка подолу",
+    "newPassword": "Нова лозинка",
+    "newPasswordPlaceholder": "Внесете нова лозинка",
+    "confirmPassword": "Потврди лозинка",
+    "confirmPasswordPlaceholder": "Потврдете ја новата лозинка",
+    "submitButton": "Ресетирај лозинка",
+    "successTitle": "Лозинката е ресетирана!",
+    "successMessage": "Вашата лозинка е успешно ресетирана. Сега можете да се најавите со вашата нова лозинка.",
+    "loginButton": "Оди на најава",
+    "errorTitle": "Ресетирањето не успеа",
+    "noToken": "Не е обезбеден токен за ресетирање. Побарајте нов линк за ресетирање на лозинката.",
+    "homeButton": "Оди на почетна",
+    "errors": {
+      "passwordRequired": "Лозинката е задолжителна",
+      "passwordTooShort": "Лозинката мора да има најмалку 8 карактери",
+      "confirmPasswordRequired": "Ве молиме потврдете ја лозинката",
+      "passwordMismatch": "Лозинките не се совпаѓаат",
+      "resetFailed": "Неуспешно ресетирање на лозинката. Линкот можеби е истечен."
+    }
+  },
   "common": {
     "back": "Назад",
     "retry": "Обиди се повторно",
@@ -174,6 +262,11 @@
       "eyebrow": "Организациска регистрација",
       "title": "Внесете ги податоците за вашата фирма",
       "subtitle": "Помогнуваме да ги поврзете вашите сертификати, даночна регулатива и ERP систем во еден безбеден процес.",
+      "verificationRequired": "Потребна е потврда на е-пошта",
+      "verificationMessage": "Мора да ја потврдите вашата е-пошта пред да креирате организација. Проверете го вашето сандаче за е-пошта за потврда.",
+      "verificationEmailSent": "Е-поштата за потврда е испратена! Проверете го вашето сандаче.",
+      "resendEmail": "Испрати повторно",
+      "emailSent": "Испратено",
       "infoTitle": "Што ќе ви треба",
       "infoItem1": "Податоци од Централен Регистар (ЕДБ, регистрационо име)",
       "infoItem2": "Контакт лице од финансии (име, емаил, телефон)",

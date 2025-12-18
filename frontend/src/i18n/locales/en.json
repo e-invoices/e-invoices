@@ -10,6 +10,67 @@
     "preview": "Preview",
     "logout": "Log out"
   },
+  "profile": {
+    "accountSettings": "Account Settings",
+    "switchOrganization": "Switch Organization"
+  },
+  "account": {
+    "settings": {
+      "title": "Account Settings",
+      "subtitle": "Manage your personal account settings",
+      "profile": "Profile",
+      "security": "Security",
+      "comingSoon": "Profile editing is coming soon. For now, you can view your account information.",
+      "password": "Password",
+      "passwordSet": "Your password is set",
+      "passwordNotSet": "No password set (using Google sign-in)",
+      "changePassword": "Change",
+      "setPassword": "Set Password",
+      "connectedAccounts": "Connected Accounts",
+      "googleConnected": "Signed in with Google",
+      "emailOnly": "Email sign-in only",
+      "connected": "Connected",
+      "editProfile": "Edit Profile",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "email": "Email",
+      "emailHint": "Email cannot be changed",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "profileUpdated": "Profile updated successfully",
+      "profileUpdateFailed": "Failed to update profile",
+      "changePasswordTitle": "Change Password",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "passwordChanged": "Password changed successfully",
+      "passwordChangeFailed": "Failed to change password",
+      "passwordResetEmailSent": "Password reset email sent! Check your inbox.",
+      "passwordResetFailed": "Failed to send password reset email",
+      "setPasswordTitle": "Set Password",
+      "setPasswordDescription": "Add a password to your account so you can also sign in with email.",
+      "passwordSetSuccess": "Password set successfully",
+      "passwordSetFailed": "Failed to set password",
+      "connectGoogle": "Connect Google",
+      "connectGoogleDescription": "Link your Google account for easier sign-in",
+      "googleLinked": "Google account linked successfully",
+      "googleLinkFailed": "Failed to link Google account",
+      "googleAlreadyLinked": "This Google account is already linked to another user",
+      "cancel": "Cancel",
+      "errors": {
+        "fullNameRequired": "Full name is required",
+        "currentPasswordRequired": "Current password is required",
+        "newPasswordRequired": "New password is required",
+        "confirmPasswordRequired": "Please confirm your password",
+        "passwordMismatch": "Passwords do not match",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "incorrectPassword": "Current password is incorrect"
+      }
+    }
+  },
   "theme": {
     "light": "Light mode",
     "dark": "Dark mode"
@@ -28,6 +89,10 @@
     "fullName": "Full Name",
     "fullNamePlaceholder": "John Doe",
     "forgotPassword": "Forgot password?",
+    "forgotPasswordSubtitle": "Enter your email and we'll send you a reset link",
+    "sendResetLink": "Send Reset Link",
+    "forgotPasswordSuccess": "If an account exists with this email, you will receive a password reset link.",
+    "backToLogin": "Back to Login",
     "loading": "Please wait...",
     "login": {
       "title": "Welcome back",
@@ -54,7 +119,8 @@
       "googleRegisterFailed": "Google sign-up failed. Please try again.",
       "passwordMismatch": "Passwords do not match",
       "passwordTooShort": "Password must be at least 8 characters",
-      "acceptTerms": "You must accept the terms and conditions"
+      "acceptTerms": "You must accept the terms and conditions",
+      "forgotPasswordFailed": "Failed to send reset email. Please try again."
     }
   },
   "landing": {
@@ -125,6 +191,28 @@
     "genericError": "Failed to verify email. The link may have expired.",
     "homeButton": "Go to Home"
   },
+  "resetPassword": {
+    "title": "Reset Password",
+    "subtitle": "Enter your new password below",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "submitButton": "Reset Password",
+    "successTitle": "Password Reset!",
+    "successMessage": "Your password has been successfully reset. You can now log in with your new password.",
+    "loginButton": "Go to Login",
+    "errorTitle": "Reset Failed",
+    "noToken": "No reset token provided. Please request a new password reset link.",
+    "homeButton": "Go to Home",
+    "errors": {
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordMismatch": "Passwords do not match",
+      "resetFailed": "Failed to reset password. The link may have expired."
+    }
+  },
   "common": {
     "back": "Back",
     "retry": "Try again",
@@ -174,6 +262,11 @@
       "eyebrow": "Organization Registration",
       "title": "Enter your company details",
       "subtitle": "We help you connect your certificates, tax regulations and ERP system in one secure process.",
+      "verificationRequired": "Email Verification Required",
+      "verificationMessage": "You must verify your email address before creating an organization. Check your inbox for the verification email.",
+      "verificationEmailSent": "Verification email sent! Please check your inbox.",
+      "resendEmail": "Resend Verification Email",
+      "emailSent": "Email Sent",
       "infoTitle": "What you'll need",
       "infoItem1": "Data from Central Registry (EDB, registration name)",
       "infoItem2": "Finance contact person (name, email, phone)",

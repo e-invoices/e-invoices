@@ -49,7 +49,7 @@ const selectOrganization = async (org: OrganizationWithRole) => {
     localStorage.setItem('refresh_token', response.refresh_token)
     localStorage.setItem('selected_organization_id', org.id.toString())
 
-    await router.push('/app/overview')
+    router.push('/organization/overview')
   } catch (err) {
     error.value = (err as Error).message || 'Не може да се смени организацијата.'
     switching.value = false
@@ -57,7 +57,7 @@ const selectOrganization = async (org: OrganizationWithRole) => {
 }
 
 const createNewOrganization = () => {
-  router.push('/app/organization/create')
+  router.push('/organization/create')
 }
 
 const openJoinModal = () => {
