@@ -59,6 +59,8 @@ export function useAuth() {
       localStorage.setItem('refresh_token', data.refresh_token)
     }
     closeModals()
+    // Redirect to organization selection
+    window.location.href = '/app/organizations'
   }
 
   const handleRegisterSuccess = (data: AuthResponse) => {
@@ -71,6 +73,8 @@ export function useAuth() {
       localStorage.setItem('refresh_token', data.refresh_token)
     }
     closeModals()
+    // Redirect to organization selection
+    window.location.href = '/app/organizations'
   }
 
   const logout = () => {
@@ -78,6 +82,9 @@ export function useAuth() {
     isAuthenticated.value = false
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    localStorage.removeItem('selected_organization_id')
+    // Redirect to landing page
+    window.location.href = '/'
   }
 
   // Initialize Google Sign-In

@@ -1,6 +1,6 @@
 import logging
 
-from app.core.security import decode_access_token
+from app.core.security import get_user_context
 from app.db.session import get_session
 from app.schemas.auth import (
     AuthResponse,
@@ -10,32 +10,19 @@ from app.schemas.auth import (
     RefreshTokenRequest,
     RegisterRequest,
     SetPasswordRequest,
+    SwitchOrganizationRequest,
+    SwitchOrganizationResponse,
     Token,
+    UserContext,
 )
 from app.schemas.user import UserRead
 from app.services.auth import AuthService
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
-
-
-async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> int:
-    """Extract user ID from JWT token"""
-    try:
-        payload = decode_access_token(token)
-        user_id = int(payload.get("sub"))
-        return user_id
-    except (ValueError, TypeError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -72,39 +59,39 @@ async def google_auth(
 
 @router.get("/me", response_model=UserRead)
 async def get_current_user(
-    user_id: int = Depends(get_current_user_id),
+    ctx: UserContext = Depends(get_user_context),
     session: AsyncSession = Depends(get_session),
 ) -> UserRead:
     """Get current authenticated user"""
     auth_service = AuthService(session)
-    return await auth_service.get_current_user(user_id)
+    return await auth_service.get_current_user(ctx.user_id)
 
 
 @router.post("/set-password", response_model=UserRead)
 async def set_password(
     payload: SetPasswordRequest,
-    user_id: int = Depends(get_current_user_id),
+    ctx: UserContext = Depends(get_user_context),
     session: AsyncSession = Depends(get_session),
 ) -> UserRead:
     """Set password for OAuth users who want to add email/password login"""
     auth_service = AuthService(session)
-    logger.debug("Set password request for user_id=%s", user_id)
+    logger.debug("Set password request for user_id=%s", ctx.user_id)
     return await auth_service.set_password(
-        user_id, payload.password, payload.confirm_password
+        ctx.user_id, payload.password, payload.confirm_password
     )
 
 
 @router.post("/change-password", response_model=UserRead)
 async def change_password(
     payload: ChangePasswordRequest,
-    user_id: int = Depends(get_current_user_id),
+    ctx: UserContext = Depends(get_user_context),
     session: AsyncSession = Depends(get_session),
 ) -> UserRead:
     """Change password for users with existing password"""
     auth_service = AuthService(session)
-    logger.debug("Change password request for user_id=%s", user_id)
+    logger.debug("Change password request for user_id=%s", ctx.user_id)
     return await auth_service.change_password(
-        user_id,
+        ctx.user_id,
         payload.current_password,
         payload.new_password,
         payload.confirm_password,
@@ -123,13 +110,13 @@ async def verify_email(
 
 @router.post("/resend-verification")
 async def resend_verification(
-    user_id: int = Depends(get_current_user_id),
+    ctx: UserContext = Depends(get_user_context),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
     """Resend verification email to current user"""
     auth_service = AuthService(session)
-    logger.debug("Resend verification email for user_id=%s", user_id)
-    return await auth_service.resend_verification_email(user_id)
+    logger.debug("Resend verification email for user_id=%s", ctx.user_id)
+    return await auth_service.resend_verification_email(ctx.user_id)
 
 
 @router.post("/logout")
@@ -145,37 +132,8 @@ async def refresh_token(
     payload: RefreshTokenRequest, session: AsyncSession = Depends(get_session)
 ) -> AuthResponse:
     """Get new access token using refresh token"""
-    try:
-        token_payload = decode_access_token(payload.refresh_token)
-
-        # Verify it's a refresh token
-        if token_payload.get("type") != "refresh":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type"
-            )
-
-        user_id = int(token_payload.get("sub"))
-        auth_service = AuthService(session)
-
-        # Get user to verify they still exist and are active
-        user = await auth_service.get_current_user(user_id)
-
-        # Generate new tokens
-        token = AuthService.generate_token(user_id)
-
-        logger.info("Token refreshed for user_id=%s", user_id)
-        return AuthResponse(
-            access_token=token.access_token,
-            refresh_token=token.refresh_token,
-            token_type=token.token_type,
-            user=user,
-        )
-    except (ValueError, TypeError) as e:
-        logger.warning("Invalid refresh token: %s", str(e))
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired refresh token",
-        )
+    auth_service = AuthService(session)
+    return await auth_service.refresh_token(payload.refresh_token)
 
 
 # Legacy endpoint for OAuth2PasswordRequestForm compatibility
@@ -189,3 +147,14 @@ async def login_for_access_token(
     logger.debug("Token request for %s", form_data.username)
     user = await auth_service.authenticate_user(form_data.username, form_data.password)
     return auth_service.generate_token(user.id)
+
+
+@router.post("/switch-organization", response_model=SwitchOrganizationResponse)
+async def switch_organization(
+    payload: SwitchOrganizationRequest,
+    ctx: UserContext = Depends(get_user_context),
+    session: AsyncSession = Depends(get_session),
+) -> SwitchOrganizationResponse:
+    """Switch to a different organization and get new tokens with org context"""
+    auth_service = AuthService(session)
+    return await auth_service.switch_organization(ctx.user_id, payload.organization_id)

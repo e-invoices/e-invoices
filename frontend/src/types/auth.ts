@@ -79,3 +79,16 @@ export interface RegisterModalExposed {
   handleGoogleRegister: (response: GoogleCredentialResponse) => Promise<void>
   handleGoogleError: () => void
 }
+
+// Organization switching
+export interface SwitchOrganizationRequest {
+  organization_id: number
+}
+
+export interface SwitchOrganizationResponse {
+  access_token: string
+  refresh_token: string
+  token_type: string
+  organization_id: number
+  role: string
+}

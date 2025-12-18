@@ -3,7 +3,13 @@ from datetime import timedelta
 from typing import Optional
 
 from app.core.config import get_settings
-from app.core.security import create_access_token, get_password_hash, verify_password
+from app.core.security import (
+    create_access_token,
+    create_refresh_token,
+    decode_access_token,
+    get_password_hash,
+    verify_password,
+)
 from app.models import user as user_models
 from app.models.user import AuthProvider
 from app.schemas.auth import (
@@ -12,6 +18,7 @@ from app.schemas.auth import (
     GoogleUserInfo,
     LoginRequest,
     RegisterRequest,
+    SwitchOrganizationResponse,
     Token,
 )
 from app.schemas.user import UserCreateOAuth, UserRead
@@ -390,3 +397,82 @@ class AuthService:
     ) -> Token:
         """Public method for backwards compatibility"""
         return AuthService._generate_token(user_id, expires_delta)
+
+    async def switch_organization(
+        self, user_id: int, organization_id: int
+    ) -> SwitchOrganizationResponse:
+        """Switch to a different organization and generate new tokens with org context"""
+        from app.services.organization import OrganizationService
+
+        # Verify user has access to this organization
+        role = await OrganizationService.get_user_role_in_organization(
+            self.session, user_id, organization_id
+        )
+
+        if role is None:
+            logger.warning(
+                "User %s attempted to switch to organization %s without access",
+                user_id,
+                organization_id,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have access to this organization",
+            )
+
+        # Generate new tokens with organization context
+        access_token = create_access_token(
+            subject=user_id,
+            organization_id=organization_id,
+            organization_role=role.value,
+        )
+        refresh_token = create_refresh_token(subject=user_id)
+
+        logger.info(
+            "User %s switched to organization %s with role %s",
+            user_id,
+            organization_id,
+            role.value,
+        )
+
+        return SwitchOrganizationResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            organization_id=organization_id,
+            role=role.value,
+        )
+
+    async def refresh_token(self, refresh_token_str: str) -> AuthResponse:
+        """Get new access token using refresh token"""
+        try:
+            token_payload = decode_access_token(refresh_token_str)
+
+            # Verify it's a refresh token
+            if token_payload.get("type") != "refresh":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid token type",
+                )
+
+            user_id = int(token_payload.get("sub"))
+
+            # Get user to verify they still exist and are active
+            user = await self.get_current_user(user_id)
+
+            # Generate new tokens
+            token = self._generate_token(user_id)
+
+            logger.info("Token refreshed for user_id=%s", user_id)
+            return AuthResponse(
+                access_token=token.access_token,
+                refresh_token=token.refresh_token,
+                token_type=token.token_type,
+                user=user,
+            )
+        except (ValueError, TypeError) as e:
+            logger.warning("Invalid refresh token: %s", str(e))
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token",
+            )

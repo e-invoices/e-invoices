@@ -84,3 +84,47 @@ class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str = Field(..., min_length=8)
     confirm_password: str = Field(..., min_length=8)
+
+
+class SwitchOrganizationRequest(BaseModel):
+    """Request to switch organization context"""
+
+    organization_id: int
+
+
+class SwitchOrganizationResponse(BaseModel):
+    """Response after switching organization with new tokens"""
+
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    organization_id: int
+    role: str
+
+
+class UserContext(BaseModel):
+    """User context extracted from JWT token"""
+
+    user_id: int
+    organization_id: Optional[int] = None
+    role: Optional[str] = None
+
+    @property
+    def has_organization(self) -> bool:
+        """Check if user has selected an organization"""
+        return self.organization_id is not None
+
+    @property
+    def is_owner(self) -> bool:
+        return self.role == "owner"
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role in ("owner", "admin")
+
+    @property
+    def is_accountant(self) -> bool:
+        return self.role in ("owner", "admin", "accountant")
+
+    class Config:
+        frozen = False

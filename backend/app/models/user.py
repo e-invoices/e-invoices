@@ -1,10 +1,14 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from app.db.base import Base
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
+if TYPE_CHECKING:
+    pass
 
 
 class AuthProvider(str, Enum):
@@ -46,6 +50,14 @@ class User(Base):
         nullable=False,
     )
     last_login_at: Optional[datetime] = Column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    organizations = relationship(
+        "UserOrganization",
+        foreign_keys="UserOrganization.user_id",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
     def set_password(self, password_hash: str) -> None:
         self.hashed_password = password_hash

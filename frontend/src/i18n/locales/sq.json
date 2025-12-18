@@ -1,5 +1,6 @@
 {
   "nav": {
+    "overview": "Përmbledhje",
     "howItWorks": "Si funksionon",
     "benefits": "Përfitimet",
     "pricing": "Çmimet",
@@ -12,6 +13,9 @@
   "theme": {
     "light": "Tema e ndritshme",
     "dark": "Tema e errët"
+  },
+  "language": {
+    "label": "Gjuha"
   },
   "auth": {
     "or": "ose vazhdo me email",
@@ -120,5 +124,121 @@
     "noToken": "Nuk u dha token verifikimi.",
     "genericError": "Verifikimi i emailit dështoi. Linku mund të ketë skaduar.",
     "homeButton": "Shko në fillim"
+  },
+  "common": {
+    "back": "Kthehu",
+    "retry": "Provo përsëri",
+    "cancel": "Anulo",
+    "save": "Ruaj",
+    "delete": "Fshi",
+    "edit": "Ndrysho",
+    "loading": "Duke ngarkuar..."
+  },
+  "organization": {
+    "roles": {
+      "owner": "Pronar",
+      "admin": "Administrator",
+      "accountant": "Kontabilist",
+      "member": "Anëtar",
+      "viewer": "Shikues"
+    },
+    "select": {
+      "welcome": "Mirë se erdhe, {name}!",
+      "subtitle": "Zgjidhni si dëshironi të vazhdoni",
+      "yourOrganizations": "Organizatat tuaja",
+      "noOrganizations": "Nuk keni organizata",
+      "noOrganizationsDesc": "Krijoni një organizatë të re ose bashkohuni me një ekzistuese me kodin e ftesës.",
+      "createNew": "Organizatë e re",
+      "createNewDesc": "Regjistroni kompaninë tuaj në sistem",
+      "joinExisting": "Bashkohu",
+      "joinExistingDesc": "Vendosni kodin e ftesës nga kolegu",
+      "helpTitle": "Keni nevojë për ndihmë?",
+      "helpDesc": "Nëse jeni pronar i kompanisë, zgjidhni \"Organizatë e re\". Nëse keni marrë ftesë nga kolegu, klikoni \"Bashkohu\" dhe vendosni kodin."
+    },
+    "join": {
+      "title": "Bashkohu me organizatën",
+      "subtitle": "Vendosni kodin e ftesës ose ngjisni linkun e plotë",
+      "codeLabel": "Kodi i ftesës",
+      "codePlaceholder": "Vendosni kodin ose ngjisni linkun",
+      "validate": "Verifiko",
+      "enterCode": "Ju lutemi vendosni kodin e ftesës",
+      "invalidCode": "Kod ftese i pavlefshëm",
+      "alreadyMember": "Tashmë jeni anëtar i kësaj organizate",
+      "rolePreview": "Roli",
+      "joinButton": "Bashkohu",
+      "joining": "Duke u bashkuar...",
+      "joinFailed": "Bashkimi dështoi. Provoni përsëri.",
+      "helpText": "Kodi i ftesës vlen për 30 minuta pas krijimit."
+    },
+    "create": {
+      "eyebrow": "Regjistrimi i Organizatës",
+      "title": "Vendosni të dhënat e kompanisë suaj",
+      "subtitle": "Ju ndihmojmë të lidhni certifikatat, rregulloret tatimore dhe sistemin ERP në një proces të sigurt.",
+      "infoTitle": "Çfarë do t'ju duhet",
+      "infoItem1": "Të dhëna nga Regjistri Qendror (NUI, emri i regjistruar)",
+      "infoItem2": "Personi kontaktues i financave (emri, emaili, telefoni)",
+      "infoItem3": "Adresa e selisë së kompanisë",
+      "formTitle": "Detajet e organizatës",
+      "companyName": "Emri i kompanisë (brendi)",
+      "companyNamePlaceholder": "Shembull SHPK",
+      "registrationName": "Emri i regjistruar (nga RQ)",
+      "registrationNamePlaceholder": "Shembull SHPK Logjistikë",
+      "edb": "Numri tatimor (NUI)",
+      "edbPlaceholder": "13 shifra",
+      "embs": "NIPT",
+      "embsPlaceholder": "Numri i identifikimit",
+      "vatRegistered": "I regjistruar për TVSH",
+      "address": "Adresa",
+      "addressPlaceholder": "Rruga, numri, qyteti",
+      "contactPerson": "Personi kontaktues (emri i plotë)",
+      "contactPersonPlaceholder": "Emri Mbiemri",
+      "contactEmail": "Email kontakti",
+      "contactEmailPlaceholder": "financa{'@'}kompania.mk",
+      "contactPhone": "Telefoni",
+      "contactPhonePlaceholder": "+389 70 123 456",
+      "createButton": "Regjistro organizatën",
+      "creating": "Duke krijuar...",
+      "fillAllFields": "Ju lutemi plotësoni të gjitha fushat e detyrueshme",
+      "invalidEdb": "Numri tatimor duhet të përmbajë saktësisht 13 shifra",
+      "createFailed": "Krijimi i organizatës dështoi. Provoni përsëri.",
+      "nextStepsTitle": "Çfarë ndodh më pas?",
+      "nextStep1": "Aktivizimi i certifikatave digjitale për XAdES-BES",
+      "nextStep2": "Marrja e çelësave API për prodhim DAP",
+      "nextStep3": "Integrimi me sistemet tuaja ERP/CRM",
+      "errors": {
+        "companyNameRequired": "Emri i kompanisë është i detyrueshëm",
+        "registrationNameRequired": "Emri i regjistruar është i detyrueshëm",
+        "edbRequired": "Numri tatimor (NUI) është i detyrueshëm",
+        "edbInvalid": "Numri tatimor duhet të përmbajë saktësisht 13 shifra",
+        "embsRequired": "NIPT është i detyrueshëm",
+        "addressRequired": "Adresa është e detyrueshme",
+        "contactPersonRequired": "Personi kontaktues është i detyrueshëm",
+        "contactEmailRequired": "Email kontakti është i detyrueshëm",
+        "contactEmailInvalid": "Ju lutemi vendosni një adresë emaili të vlefshme",
+        "contactPhoneRequired": "Numri i telefonit është i detyrueshëm"
+      }
+    }
+  },
+  "dashboard": {
+    "switchOrg": "Ndrysho organizatën",
+    "successTitle": "U kyçët me sukses!",
+    "successSubtitle": "Organizata juaj është gati për të punuar me e-fatura.",
+    "edb": "Numri tatimor",
+    "embs": "NIPT",
+    "vatStatus": "Statusi TVSH",
+    "vatYes": "I regjistruar",
+    "vatNo": "I paregjistruar",
+    "address": "Adresa",
+    "contact": "Kontakti",
+    "quickActions": "Veprime të shpejta",
+    "createInvoice": "Krijo faturë",
+    "createInvoiceDesc": "Lësho një e-faturë të re",
+    "viewInvoices": "Shiko faturat",
+    "viewInvoicesDesc": "Lista e të gjitha faturave",
+    "settings": "Cilësimet",
+    "settingsDesc": "Konfigurimi i organizatës",
+    "comingSoon": "Së shpejti",
+    "infoTitle": "Sistemi në zhvillim",
+    "infoDesc": "Po punojmë për integrim të plotë me sistemin DAP. Funksionet për krijimin dhe menaxhimin e faturave do të jenë të disponueshme së shpejti."
   }
 }

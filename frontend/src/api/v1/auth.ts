@@ -6,7 +6,9 @@ import type {
   RegisterRequest,
   GoogleAuthRequest,
   SetPasswordRequest,
-  ChangePasswordRequest
+  ChangePasswordRequest,
+  SwitchOrganizationRequest,
+  SwitchOrganizationResponse
 } from '@/types/auth'
 
 export const authApi = {
@@ -36,4 +38,7 @@ export const authApi = {
 
   resendVerification: () =>
     api.post<{ message: string }>('/auth/resend-verification'),
+
+  switchOrganization: (data: SwitchOrganizationRequest) =>
+    api.post<SwitchOrganizationResponse>('/auth/switch-organization', data),
 }

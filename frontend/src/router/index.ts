@@ -37,6 +37,38 @@ const routes = [
       },
     ],
   },
+  // App routes (authenticated) - organization selection/creation uses PublicLayout
+  {
+    path: '/app',
+    component: () => import('@/layouts/PublicLayout.vue'),
+    children: [
+      {
+        path: 'organizations',
+        name: 'organization-select',
+        component: () => import('@/pages/public/OrganizationSelectPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'organization/create',
+        name: 'organization-create',
+        component: () => import('@/pages/public/OrganizationCreatePage.vue'),
+        meta: { requiresAuth: true },
+      },
+    ],
+  },
+  // App routes (authenticated) - main app with sidebar uses AppLayout
+  {
+    path: '/app',
+    component: () => import('@/layouts/AppLayout.vue'),
+    children: [
+      {
+        path: 'overview',
+        name: 'overview',
+        component: () => import('@/pages/app/OverviewPage.vue'),
+        meta: { requiresAuth: true },
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
