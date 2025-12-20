@@ -317,8 +317,10 @@ class OrganizationService:
             )
             db.add(user_org)
 
-        # Update invitation use count
+        # Update invitation use count and deactivate if max uses reached
         invitation.use_count += 1
+        if invitation.use_count >= invitation.max_uses:
+            invitation.is_active = False
 
         await db.commit()
 

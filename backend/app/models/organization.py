@@ -145,7 +145,7 @@ class OrganizationInvitation(Base):
 
     # Expiration and limits
     expires_at: datetime = Column(DateTime(timezone=True), nullable=False)
-    max_uses: Optional[int] = Column(Integer, nullable=True)  # NULL = unlimited
+    max_uses: int = Column(Integer, default=1, nullable=False)
     use_count: int = Column(Integer, default=0, nullable=False)
 
     # Status

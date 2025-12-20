@@ -92,7 +92,7 @@ class InvitationCreate(BaseModel):
 
     role: OrganizationRole = OrganizationRole.MEMBER
     target_email: Optional[EmailStr] = None
-    max_uses: Optional[int] = Field(None, ge=1)
+    max_uses: int = Field(default=1, ge=1)
 
 
 class InvitationResponse(BaseModel):
