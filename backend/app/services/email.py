@@ -277,6 +277,111 @@ class EmailService:
         subject = "Добредојдовте на e-Faktura!"
         return self._send_email(to_email, subject, html_content)
 
+    def send_organization_invitation_email(
+        self,
+        to_email: str,
+        organization_name: str,
+        inviter_name: Optional[str],
+        role: str,
+        invitation_code: str,
+        base_url: str = "http://localhost:5173",
+        user_exists: bool = False,
+    ) -> bool:
+        """Send organization invitation email.
+
+        Args:
+            to_email: Email address to send the invitation to.
+            organization_name: Name of the organization the user is invited to.
+            inviter_name: Name of the person who sent the invitation.
+            role: Role the invited user will have in the organization.
+            invitation_code: Unique code for the invitation.
+            base_url: Base URL of the frontend application.
+            user_exists: If True, sends to login page. If False, sends to register page.
+
+        Returns:
+            True if email was sent successfully, False otherwise.
+        """
+        # Link goes to the join page which handles all auth states
+        join_url = f"/organization/join?code={invitation_code}"
+        if user_exists:
+            # User has account - send to login first, then join
+            invitation_link = f"{base_url}/login?redirect={join_url}"
+            alt_link = f"{base_url}/register?redirect={join_url}"
+            alt_text = f'Немате сметка? <a href="{alt_link}" style="color: #3b82f6;">Регистрирајте се тука</a>'
+        else:
+            # User doesn't have account - send to register first, then join
+            invitation_link = f"{base_url}/register?redirect={join_url}"
+            alt_link = f"{base_url}/login?redirect={join_url}"
+            alt_text = f'Веќе имате сметка? <a href="{alt_link}" style="color: #3b82f6;">Најавете се тука</a>'
+
+        inviter = inviter_name or "Член на тимот"
+
+        # Role translation
+        role_translations = {
+            "owner": "Сопственик",
+            "admin": "Администратор",
+            "accountant": "Сметководител",
+            "member": "Член",
+            "viewer": "Набљудувач",
+        }
+        role_mk = role_translations.get(role.lower(), role)
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+                .content {{ background-color: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }}
+                .footer {{ text-align: center; color: #64748b; font-size: 12px; margin-top: 20px; }}
+                .role-badge {{ display: inline-block; background-color: #e0e7ff; color: #4f46e5; padding: 4px 12px; border-radius: 15px; font-size: 14px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>e-Faktura</h1>
+                </div>
+                <div class="content">
+                    <h2>Поканети сте да се приклучите на организација</h2>
+                    <p>Здраво,</p>
+                    <p><strong>{inviter}</strong> ве покани да се приклучите на организацијата <strong>{organization_name}</strong> на e-Faktura.</p>
+
+                    <p>Вашата улога: <span class="role-badge">{role_mk}</span></p>
+
+                    <p style="text-align: center;">
+                        <a href="{invitation_link}" style="display: inline-block; background-color: #3b82f6; color: #ffffff !important; padding: 12px 30px; text-decoration: none; border-radius: 25px; margin: 20px 0; font-weight: bold;">Прифати покана</a>
+                    </p>
+
+                    <p>Или копирајте го овој линк во вашиот прелистувач:</p>
+                    <p style="word-break: break-all; color: #3b82f6;">{invitation_link}</p>
+
+                    <p><strong>Оваа покана важи само 30 минути.</strong></p>
+
+                    <p style="color: #64748b; font-size: 14px;">
+                        {alt_text}
+                    </p>
+
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+
+                    <p style="color: #64748b; font-size: 14px;">
+                        Ако не очекувавте оваа покана, можете безбедно да ја игнорирате оваа порака.
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>© 2025 e-Faktura. Сите права се задржани.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        subject = f"Покана за приклучување на {organization_name} - e-Faktura"
+        return self._send_email(to_email, subject, html_content)
+
 
 # Singleton instance
 email_service = EmailService()

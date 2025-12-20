@@ -5,6 +5,7 @@ import { organizationApi } from '@/api/v1/organization'
 
 const props = defineProps<{
   show: boolean
+  initialCode?: string
 }>()
 
 const emit = defineEmits<{
@@ -34,16 +35,24 @@ watch(() => props.show, (isVisible) => {
     organizationPreview.value = null
     loading.value = false
     validating.value = false
+  } else if (props.initialCode) {
+    // Auto-fill and validate the initial code when modal opens
+    invitationCode.value = props.initialCode
+    validateCode()
   }
 })
 
 // Extract code from full URL or use as-is
 const extractCode = (input: string): string => {
-  // Check if it's a full URL with code parameter
+  // Check if it's a full URL with code parameter or join parameter
   try {
     if (input.includes('?code=') || input.includes('&code=')) {
       const url = new URL(input, window.location.origin)
       return url.searchParams.get('code') || input
+    }
+    if (input.includes('?join=') || input.includes('&join=')) {
+      const url = new URL(input, window.location.origin)
+      return url.searchParams.get('join') || input
     }
   } catch {
     // Not a valid URL, use as-is

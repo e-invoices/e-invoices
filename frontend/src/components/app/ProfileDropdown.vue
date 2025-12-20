@@ -101,20 +101,17 @@ onUnmounted(() => {
     <!-- Profile Button -->
     <button
       @click="toggleDropdown"
-      class="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+      class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm hover:ring-2 hover:ring-slate-300 dark:hover:ring-slate-600 transition-all cursor-pointer border-none"
     >
-      <!-- Avatar Circle -->
-      <div class="w-9 h-9 rounded-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-sm">
-        <img
-          v-if="showProfilePicture"
-          :src="user?.picture_url"
-          :alt="displayName"
-          class="w-full h-full object-cover"
-          referrerpolicy="no-referrer"
-          @error="handleImageError"
-        />
-        <span v-else>{{ initials }}</span>
-      </div>
+      <img
+        v-if="showProfilePicture"
+        :src="user?.picture_url"
+        :alt="displayName"
+        class="w-full h-full object-cover"
+        referrerpolicy="no-referrer"
+        @error="handleImageError"
+      />
+      <span v-else>{{ initials }}</span>
     </button>
 
     <!-- Dropdown Menu -->

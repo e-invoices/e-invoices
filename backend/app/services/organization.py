@@ -10,9 +10,11 @@ from app.models.organization import (
 from app.models.user import User
 from app.schemas.organization import (
     InvitationCreate,
+    InvitationWithLink,
     OrganizationCreate,
     OrganizationUpdate,
     OrganizationWithRole,
+    TeamMember,
 )
 from pydantic.v1 import EmailStr
 from sqlalchemy import and_, select
@@ -166,6 +168,64 @@ class OrganizationService:
         return invitation
 
     @staticmethod
+    async def create_invitation_with_notification(
+        db: AsyncSession,
+        organization_id: int,
+        inviter_id: int,
+        data: InvitationCreate,
+    ) -> InvitationWithLink:
+        """Create invitation and optionally send email notification."""
+        from app.core.config import get_settings
+        from app.services.email import email_service
+        from app.services.user import UserService
+
+        settings = get_settings()
+
+        invitation = await OrganizationService.create_invitation(
+            db, organization_id, inviter_id, data
+        )
+
+        # Build the invitation link (frontend URL)
+        link = f"/organization?join={invitation.code}"
+
+        # Send invitation email if target_email is provided
+        if data.target_email:
+            organization = await OrganizationService.get_organization_by_id(
+                db, organization_id
+            )
+            user_service = UserService(db)
+            inviter = await user_service.get_by_id(inviter_id)
+
+            # Check if user with this email already exists
+            existing_user = await user_service.get_by_email(data.target_email)
+            user_exists = existing_user is not None
+
+            if organization:
+                email_service.send_organization_invitation_email(
+                    to_email=data.target_email,
+                    organization_name=organization.company_name,
+                    inviter_name=inviter.full_name if inviter else None,
+                    role=invitation.role.value,
+                    invitation_code=invitation.code,
+                    base_url=settings.frontend_url,
+                    user_exists=user_exists,
+                )
+
+        return InvitationWithLink(
+            id=invitation.id,
+            organization_id=invitation.organization_id,
+            code=invitation.code,
+            role=invitation.role,
+            target_email=invitation.target_email,
+            expires_at=invitation.expires_at,
+            max_uses=invitation.max_uses,
+            use_count=invitation.use_count,
+            is_active=invitation.is_active,
+            created_at=invitation.created_at,
+            link=link,
+        )
+
+    @staticmethod
     async def get_invitation_by_code(
         db: AsyncSession, code: str
     ) -> Optional[OrganizationInvitation]:
@@ -217,7 +277,7 @@ class OrganizationService:
         if not is_valid or not invitation:
             return False, message, None, None
 
-        # Check if user is already a member
+        # Check if user is already an active member
         is_member = await OrganizationService.is_user_member(
             db, user_id, invitation.organization_id
         )
@@ -228,17 +288,34 @@ class OrganizationService:
         if invitation.target_email:
             result = await db.execute(select(User).where(User.id == user_id))
             user = result.scalar_one_or_none()
-            if user and user.email != invitation.target_email:
+            if user and user.email.lower() != invitation.target_email.lower():
                 return False, "Оваа покана е наменета за друга е-пошта.", None, None
 
-        # Create user-organization relationship
-        user_org = UserOrganization(
-            user_id=user_id,
-            organization_id=invitation.organization_id,
-            role=invitation.role,
-            invited_by=invitation.created_by,
+        # Check if there's an existing inactive membership (user was previously removed)
+        result = await db.execute(
+            select(UserOrganization).where(
+                and_(
+                    UserOrganization.user_id == user_id,
+                    UserOrganization.organization_id == invitation.organization_id,
+                )
+            )
         )
-        db.add(user_org)
+        existing_membership = result.scalar_one_or_none()
+
+        if existing_membership:
+            # Reactivate the existing membership with the new role
+            existing_membership.is_active = True
+            existing_membership.role = invitation.role
+            existing_membership.invited_by = invitation.created_by
+        else:
+            # Create new user-organization relationship
+            user_org = UserOrganization(
+                user_id=user_id,
+                organization_id=invitation.organization_id,
+                role=invitation.role,
+                invited_by=invitation.created_by,
+            )
+            db.add(user_org)
 
         # Update invitation use count
         invitation.use_count += 1
@@ -317,6 +394,193 @@ class OrganizationService:
             .order_by(OrganizationInvitation.created_at.desc())
         )
         return list(result.scalars().all())
+
+    @staticmethod
+    async def get_organization_members(
+        db: AsyncSession, organization_id: int
+    ) -> List[TeamMember]:
+        """Get all members of an organization with their user details."""
+        result = await db.execute(
+            select(UserOrganization)
+            .options(selectinload(UserOrganization.user))
+            .where(
+                and_(
+                    UserOrganization.organization_id == organization_id,
+                    UserOrganization.is_active,
+                )
+            )
+            .order_by(UserOrganization.joined_at.asc())
+        )
+        user_orgs = result.scalars().all()
+
+        members = []
+        for user_org in user_orgs:
+            user = user_org.user
+            members.append(
+                TeamMember(
+                    id=user_org.id,
+                    user_id=user.id,
+                    email=user.email,
+                    full_name=user.full_name,
+                    picture_url=user.picture_url,
+                    role=user_org.role,
+                    joined_at=user_org.joined_at,
+                )
+            )
+
+        return members
+
+    @staticmethod
+    async def remove_member(
+        db: AsyncSession,
+        organization_id: int,
+        member_id: int,
+        requester_id: int,
+    ) -> Tuple[bool, str]:
+        """
+        Remove a member from an organization.
+        Returns (success, message).
+
+        Permission rules:
+        - Owner can remove anyone except themselves
+        - Admin can remove accountants, members, and viewers (not owner or other admins)
+        - Cannot remove yourself
+        """
+        # Get the member to remove
+        result = await db.execute(
+            select(UserOrganization).where(
+                and_(
+                    UserOrganization.id == member_id,
+                    UserOrganization.organization_id == organization_id,
+                    UserOrganization.is_active,
+                )
+            )
+        )
+        member = result.scalar_one_or_none()
+
+        if not member:
+            return False, "Членот не е пронајден."
+
+        # Cannot remove yourself
+        if member.user_id == requester_id:
+            return False, "Не можете да се отстраните себеси."
+
+        # Get requester's role
+        requester_role = await OrganizationService.get_user_role_in_organization(
+            db, requester_id, organization_id
+        )
+
+        if not requester_role:
+            return False, "Немате пристап до оваа организација."
+
+        # Define role hierarchy (lower number = higher authority)
+        role_hierarchy = {
+            OrganizationRole.OWNER: 0,
+            OrganizationRole.ADMIN: 1,
+            OrganizationRole.ACCOUNTANT: 2,
+            OrganizationRole.MEMBER: 3,
+            OrganizationRole.VIEWER: 4,
+        }
+
+        requester_level = role_hierarchy.get(requester_role, 99)
+        member_level = role_hierarchy.get(member.role, 99)
+
+        # Only owner and admin can remove members
+        if requester_role not in [OrganizationRole.OWNER, OrganizationRole.ADMIN]:
+            return False, "Немате дозвола да отстранувате членови."
+
+        # Can only remove users with lower authority
+        if requester_level >= member_level:
+            return False, "Немате дозвола да го отстраните овој член."
+
+        # Deactivate the membership (soft delete)
+        member.is_active = False
+        await db.commit()
+
+        return True, "Членот е успешно отстранет."
+
+    @staticmethod
+    async def change_member_role(
+        db: AsyncSession,
+        organization_id: int,
+        member_id: int,
+        new_role: OrganizationRole,
+        requester_id: int,
+    ) -> Tuple[bool, str]:
+        """
+        Change a member's role in an organization.
+        Returns (success, message).
+
+        Permission rules:
+        - Owner can change anyone's role (except themselves) to any role except owner
+        - Admin can change roles of accountants, members, and viewers (not owner or other admins)
+        - Admin cannot promote someone to admin or owner
+        - Cannot change your own role
+        """
+        # Get the member whose role will be changed
+        result = await db.execute(
+            select(UserOrganization).where(
+                and_(
+                    UserOrganization.id == member_id,
+                    UserOrganization.organization_id == organization_id,
+                    UserOrganization.is_active,
+                )
+            )
+        )
+        member = result.scalar_one_or_none()
+
+        if not member:
+            return False, "Членот не е пронајден."
+
+        # Cannot change your own role
+        if member.user_id == requester_id:
+            return False, "Не можете да ја промените сопствената улога."
+
+        # Get requester's role
+        requester_role = await OrganizationService.get_user_role_in_organization(
+            db, requester_id, organization_id
+        )
+
+        if not requester_role:
+            return False, "Немате пристап до оваа организација."
+
+        # Define role hierarchy (lower number = higher authority)
+        role_hierarchy = {
+            OrganizationRole.OWNER: 0,
+            OrganizationRole.ADMIN: 1,
+            OrganizationRole.ACCOUNTANT: 2,
+            OrganizationRole.MEMBER: 3,
+            OrganizationRole.VIEWER: 4,
+        }
+
+        requester_level = role_hierarchy.get(requester_role, 99)
+        member_current_level = role_hierarchy.get(member.role, 99)
+        new_role_level = role_hierarchy.get(new_role, 99)
+
+        # Only owner and admin can change roles
+        if requester_role not in [OrganizationRole.OWNER, OrganizationRole.ADMIN]:
+            return False, "Немате дозвола да менувате улоги."
+
+        # Cannot change to owner role
+        if new_role == OrganizationRole.OWNER:
+            return False, "Не може да се додели улога на сопственик."
+
+        # Can only change roles of users with lower authority
+        if requester_level >= member_current_level:
+            return False, "Немате дозвола да ја промените улогата на овој член."
+
+        # Admin cannot promote someone to admin level
+        if (
+            requester_role == OrganizationRole.ADMIN
+            and new_role_level <= requester_level
+        ):
+            return False, "Немате дозвола да доделите оваа улога."
+
+        # Update the role
+        member.role = new_role
+        await db.commit()
+
+        return True, "Улогата е успешно променета."
 
 
 # Create singleton instance

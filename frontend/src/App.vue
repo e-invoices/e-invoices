@@ -4,12 +4,14 @@ import { onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import { useTheme } from '@/composables/useTheme'
 
-const { setupAuthListeners } = useAuth()
+const { setupAuthListeners, checkSession } = useAuth()
 const { initTheme } = useTheme()
 
-onMounted(() => {
+onMounted(async () => {
   setupAuthListeners()
   initTheme()
+  // Check for existing session on app load
+  await checkSession()
 })
 </script>
 

@@ -108,6 +108,11 @@ async function apiRequest<T>(
     throw new Error(error.detail || `HTTP ${response.status}`)
   }
 
+  // Handle 204 No Content - return undefined/null instead of trying to parse JSON
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return response.json()
 }
 
@@ -124,6 +129,12 @@ export const api = {
   put: <T>(endpoint: string, data?: unknown) =>
     apiRequest<T>(endpoint, {
       method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    }),
+
+  patch: <T>(endpoint: string, data?: unknown) =>
+    apiRequest<T>(endpoint, {
+      method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
     }),
 

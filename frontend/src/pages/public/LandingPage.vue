@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 const { t } = useI18n()
-const { openRegister } = useAuth()
+const router = useRouter()
+const { isAuthenticated } = useAuth()
+
+const handleStartFree = () => {
+  if (isAuthenticated.value) {
+    router.push('/organization')
+  } else {
+    router.push('/register')
+  }
+}
 </script>
 
 <template>
@@ -28,10 +38,10 @@ const { openRegister } = useAuth()
 
             <div class="flex flex-col sm:flex-row gap-3 md:gap-4">
               <button
-                @click="openRegister"
+                @click="handleStartFree"
                 class="min-w-[180px] inline-block text-center px-6 md:px-8 py-3 md:py-4 bg-blue-500 text-white font-semibold rounded-full shadow-lg shadow-blue-500/50 hover:bg-blue-600 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap border-none cursor-pointer"
               >
-                {{ t('landing.startFree') }}
+                {{ isAuthenticated ? t('landing.chooseOrganization') : t('landing.startFree') }}
               </button>
               <a
                 href="/demo"

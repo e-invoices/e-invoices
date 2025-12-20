@@ -11,10 +11,6 @@ import { authApi } from '@/api/v1/auth'
 // Google Client ID - Replace with your actual Google Client ID
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'
 
-// Auth modal state
-const showLoginModal = ref(false)
-const showRegisterModal = ref(false)
-
 // Current user state
 const currentUser = ref<User | null>(null)
 const isAuthenticated = ref(false)
@@ -23,31 +19,6 @@ const isAuthenticated = ref(false)
 const isGoogleLoaded = ref(false)
 
 export function useAuth() {
-  const openLogin = () => {
-    showRegisterModal.value = false
-    showLoginModal.value = true
-  }
-
-  const openRegister = () => {
-    showLoginModal.value = false
-    showRegisterModal.value = true
-  }
-
-  const closeModals = () => {
-    showLoginModal.value = false
-    showRegisterModal.value = false
-  }
-
-  const switchToRegister = () => {
-    showLoginModal.value = false
-    showRegisterModal.value = true
-  }
-
-  const switchToLogin = () => {
-    showRegisterModal.value = false
-    showLoginModal.value = true
-  }
-
   const handleLoginSuccess = (data: AuthResponse) => {
     currentUser.value = data.user
     isAuthenticated.value = true
@@ -58,9 +29,7 @@ export function useAuth() {
     if (data.refresh_token) {
       localStorage.setItem('refresh_token', data.refresh_token)
     }
-    closeModals()
-    // Redirect to organization selection
-    window.location.href = '/organization'
+    // Note: redirect is now handled by the calling page/component
   }
 
   const handleRegisterSuccess = (data: AuthResponse) => {
@@ -72,9 +41,7 @@ export function useAuth() {
     if (data.refresh_token) {
       localStorage.setItem('refresh_token', data.refresh_token)
     }
-    closeModals()
-    // Redirect to organization selection
-    window.location.href = '/organization'
+    // Note: redirect is now handled by the calling page/component
   }
 
   const logout = () => {
@@ -189,18 +156,11 @@ export function useAuth() {
 
   return {
     // State
-    showLoginModal,
-    showRegisterModal,
     currentUser,
     isAuthenticated,
     isGoogleLoaded,
 
     // Methods
-    openLogin,
-    openRegister,
-    closeModals,
-    switchToRegister,
-    switchToLogin,
     handleLoginSuccess,
     handleRegisterSuccess,
     logout,

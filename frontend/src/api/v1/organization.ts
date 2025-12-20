@@ -2,12 +2,15 @@ import { api } from '../client'
 import type {
   Organization,
   OrganizationWithRole,
+  OrganizationRole,
   OrganizationCreate,
   UserOrganizationsResponse,
   InvitationCreate,
   InvitationResponse,
   JoinOrganizationResponse,
   ValidateInvitationResponse,
+  TeamMember,
+  TeamMembersResponse,
 } from '@/types/organization'
 
 // Re-export types for convenience
@@ -22,6 +25,8 @@ export type {
   JoinOrganizationRequest,
   JoinOrganizationResponse,
   ValidateInvitationResponse,
+  TeamMember,
+  TeamMembersResponse,
 } from '@/types/organization'
 
 export const organizationApi = {
@@ -60,6 +65,18 @@ export const organizationApi = {
   // Validate invitation code
   validateInvitation: (code: string) =>
     api.get<ValidateInvitationResponse>(`/organizations/join/validate?code=${encodeURIComponent(code)}`),
+
+  // Get organization members
+  getMembers: (organizationId: number) =>
+    api.get<TeamMembersResponse>(`/organizations/${organizationId}/members`),
+
+  // Remove a member from the organization
+  removeMember: (organizationId: number, memberId: number) =>
+    api.delete(`/organizations/${organizationId}/members/${memberId}`),
+
+  // Change a member's role
+  changeMemberRole: (organizationId: number, memberId: number, role: OrganizationRole) =>
+    api.patch<TeamMember>(`/organizations/${organizationId}/members/${memberId}/role`, { role }),
 }
 
 export default organizationApi

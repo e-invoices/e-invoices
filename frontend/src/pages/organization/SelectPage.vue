@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { organizationApi, type OrganizationWithRole } from '@/api/v1/organization.ts'
 import { authApi } from '@/api/v1/auth.ts'
@@ -9,6 +9,7 @@ import JoinOrganizationModal from '@/components/organization/JoinOrganizationMod
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const { currentUser } = useAuth()
 
 const organizations = ref<OrganizationWithRole[]>([])
@@ -16,6 +17,7 @@ const loading = ref(true)
 const switching = ref(false)
 const error = ref('')
 const showJoinModal = ref(false)
+const initialJoinCode = ref('')
 
 const userName = computed(() => {
   return currentUser.value?.full_name || currentUser.value?.email || 'Корисник'
@@ -60,12 +62,22 @@ const createNewOrganization = () => {
   router.push('/organization/create')
 }
 
-const openJoinModal = () => {
+const openJoinModal = (codeOrEvent?: string | PointerEvent | Event) => {
+  if (typeof codeOrEvent === 'string') {
+    initialJoinCode.value = codeOrEvent
+  } else {
+    initialJoinCode.value = ''
+  }
   showJoinModal.value = true
 }
 
 const handleJoinSuccess = async () => {
   showJoinModal.value = false
+  initialJoinCode.value = ''
+  // Clear the join query param from URL
+  if (route.query.join) {
+    router.replace({ query: {} })
+  }
   // Reload organizations to get the newly joined one
   await loadOrganizations()
   // If there's only one organization now, auto-select it
@@ -98,6 +110,13 @@ const getRoleLabel = (role: string) => {
 }
 
 onMounted(() => {
+  // Check for join code in URL query params - redirect to JoinPage
+  const joinCode = route.query.join as string
+  if (joinCode) {
+    router.replace(`/organization/join?code=${joinCode}`)
+    return
+  }
+
   loadOrganizations()
 })
 </script>
@@ -250,6 +269,7 @@ onMounted(() => {
     <!-- Join Organization Modal -->
     <JoinOrganizationModal
       :show="showJoinModal"
+      :initial-code="initialJoinCode"
       @close="showJoinModal = false"
       @success="handleJoinSuccess"
     />

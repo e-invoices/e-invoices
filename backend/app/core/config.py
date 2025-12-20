@@ -83,6 +83,11 @@ class Settings:
         default_factory=lambda: _env_optional("GOOGLE_CLIENT_SECRET")
     )
 
+    # Frontend URL for email links
+    frontend_url: str = field(
+        default_factory=lambda: _env_optional("FRONTEND_URL") or "http://localhost:5173"
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:

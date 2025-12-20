@@ -1,6 +1,34 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import OrganizationLayout from '@/layouts/OrganizationLayout.vue'
 
 const routes = [
+  // Auth routes (OrganizationLayout without sidebar and profile)
+  {
+    path: '/login',
+    component: OrganizationLayout,
+    props: { showSidebar: false, showProfile: false },
+    children: [
+      {
+        path: '',
+        name: 'login',
+        component: () => import('@/pages/auth/LoginPage.vue'),
+        meta: { guestOnly: true },
+      },
+    ],
+  },
+  {
+    path: '/register',
+    component: OrganizationLayout,
+    props: { showSidebar: false, showProfile: false },
+    children: [
+      {
+        path: '',
+        name: 'register',
+        component: () => import('@/pages/auth/RegisterPage.vue'),
+        meta: { guestOnly: true },
+      },
+    ],
+  },
   {
     path: '/',
     component: () => import('@/layouts/PublicLayout.vue'),
@@ -55,10 +83,11 @@ const routes = [
       },
     ],
   },
-  // Organization selection/creation (authenticated, no org context)
+  // Organization selection/creation (OrganizationLayout without sidebar)
   {
     path: '/organization',
-    component: () => import('@/layouts/PublicLayout.vue'),
+    component: OrganizationLayout,
+    props: { showSidebar: false, showProfile: true },
     children: [
       {
         path: '',
@@ -72,17 +101,35 @@ const routes = [
         component: () => import('@/pages/organization/CreatePage.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: 'join',
+        name: 'organization-join',
+        component: () => import('@/pages/organization/JoinPage.vue'),
+        // No requiresAuth - the page handles auth state itself
+      },
     ],
   },
   // Organization app routes (authenticated, with org context and sidebar)
   {
     path: '/organization',
-    component: () => import('@/layouts/OrganizationLayout.vue'),
+    component: OrganizationLayout,
     children: [
       {
         path: 'overview',
         name: 'organization-overview',
         component: () => import('@/pages/organization/OverviewPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'settings',
+        name: 'organization-settings',
+        component: () => import('@/pages/organization/SettingsPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'team',
+        name: 'organization-team',
+        component: () => import('@/pages/organization/TeamPage.vue'),
         meta: { requiresAuth: true },
       },
     ],
@@ -99,8 +146,20 @@ router.beforeEach((to, _from, next) => {
   const isAuthenticated = !!localStorage.getItem('access_token')
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirect to landing page if trying to access protected route
-    next({ name: 'landing' })
+    // Redirect to login page with redirect query param
+    next({
+      name: 'login',
+      query: { redirect: to.fullPath }
+    })
+  } else if (to.meta.guestOnly && isAuthenticated) {
+    // Redirect authenticated users away from guest-only pages (login/register)
+    // But respect the redirect query param if present
+    const redirectPath = to.query.redirect as string
+    if (redirectPath) {
+      next(redirectPath)
+    } else {
+      next({ name: 'organization-select' })
+    }
   } else {
     next()
   }

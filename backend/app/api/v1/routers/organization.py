@@ -1,11 +1,12 @@
 import logging
 from typing import List
 
-from app.core.security import get_user_context
+from app.core.security import get_optional_user_context, get_user_context
 from app.db.session import get_session
 from app.models.organization import OrganizationRole
 from app.schemas.auth import UserContext
 from app.schemas.organization import (
+    ChangeMemberRoleRequest,
     InvitationCreate,
     InvitationResponse,
     InvitationWithLink,
@@ -15,6 +16,8 @@ from app.schemas.organization import (
     OrganizationResponse,
     OrganizationUpdate,
     OrganizationWithRole,
+    TeamMember,
+    TeamMembersResponse,
     UserOrganizationsResponse,
 )
 from app.services.organization import organization_service
@@ -143,6 +146,93 @@ async def update_organization(
     return organization
 
 
+@router.get("/{organization_id}/members", response_model=TeamMembersResponse)
+async def get_members(
+    organization_id: int,
+    ctx: UserContext = Depends(get_user_context),
+    session: AsyncSession = Depends(get_session),
+) -> TeamMembersResponse:
+    """Get all members of an organization. User must be a member."""
+    # Check if user is a member
+    role = await organization_service.get_user_role_in_organization(
+        session, ctx.user_id, organization_id
+    )
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Немате пристап до оваа организација.",
+        )
+
+    members = await organization_service.get_organization_members(
+        session, organization_id
+    )
+    return TeamMembersResponse(members=members, total=len(members))
+
+
+@router.delete(
+    "/{organization_id}/members/{member_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def remove_member(
+    organization_id: int,
+    member_id: int,
+    ctx: UserContext = Depends(get_user_context),
+    session: AsyncSession = Depends(get_session),
+):
+    """Remove a member from an organization. Only owner/admin can remove members."""
+    success, message = await organization_service.remove_member(
+        session, organization_id, member_id, ctx.user_id
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=message,
+        )
+
+
+@router.patch(
+    "/{organization_id}/members/{member_id}/role",
+    response_model=TeamMember,
+)
+async def change_member_role(
+    organization_id: int,
+    member_id: int,
+    data: ChangeMemberRoleRequest,
+    ctx: UserContext = Depends(get_user_context),
+    session: AsyncSession = Depends(get_session),
+) -> TeamMember:
+    """
+    Change a member's role in an organization.
+
+    Permission rules:
+    - Owner can change anyone's role (except themselves) to any role except owner
+    - Admin can change roles of accountants, members, and viewers
+    - Admin cannot promote someone to admin or owner
+    """
+    success, message = await organization_service.change_member_role(
+        session, organization_id, member_id, data.role, ctx.user_id
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=message,
+        )
+
+    # Fetch the updated member info to return
+    members = await organization_service.get_organization_members(
+        session, organization_id
+    )
+    updated_member = next((m for m in members if m.id == member_id), None)
+
+    if not updated_member:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Членот не е пронајден.",
+        )
+
+    return updated_member
+
+
 # Invitation endpoints
 @router.post("/{organization_id}/invitations", response_model=InvitationWithLink)
 async def create_invitation(
@@ -165,26 +255,16 @@ async def create_invitation(
             detail="Немате дозвола да креирате покани за оваа организација.",
         )
 
-    invitation = await organization_service.create_invitation(
+    invitation = await organization_service.create_invitation_with_notification(
         session, organization_id, ctx.user_id, data
     )
 
-    # Build the invitation link (frontend URL)
-    link = f"/join?code={invitation.code}"
-
-    return InvitationWithLink(
-        id=invitation.id,
-        organization_id=invitation.organization_id,
-        code=invitation.code,
-        role=invitation.role,
-        target_email=invitation.target_email,
-        expires_at=invitation.expires_at,
-        max_uses=invitation.max_uses,
-        use_count=invitation.use_count,
-        is_active=invitation.is_active,
-        created_at=invitation.created_at,
-        link=link,
+    logger.info(
+        f"Invitation created for org {organization_id} by user {ctx.user_id}"
+        + (f", email sent to {data.target_email}" if data.target_email else "")
     )
+
+    return invitation
 
 
 @router.get("/{organization_id}/invitations", response_model=List[InvitationResponse])
@@ -263,7 +343,7 @@ async def join_organization(
 @router.get("/join/validate", response_model=dict)
 async def validate_invitation_code(
     code: str,
-    ctx: UserContext = Depends(get_user_context),
+    ctx: UserContext | None = Depends(get_optional_user_context),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
     """Validate an invitation code and return organization info."""
@@ -274,14 +354,25 @@ async def validate_invitation_code(
     if not is_valid or not invitation:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)
 
-    # Check if user is already a member
-    is_member = await organization_service.is_user_member(
-        session, ctx.user_id, invitation.organization_id
-    )
+    # Default values for unauthenticated users
+    is_member = False
+    current_email = None
+
+    # If user is authenticated, check membership and get their email
+    if ctx:
+        is_member = await organization_service.is_user_member(
+            session, ctx.user_id, invitation.organization_id
+        )
+        user_service = UserService(session)
+        user = await user_service.get_by_id(ctx.user_id)
+        current_email = user.email if user else None
 
     return {
         "valid": True,
+        "organization_id": invitation.organization_id,
         "organization_name": invitation.organization.company_name,
         "role": invitation.role,
         "already_member": is_member,
+        "target_email": invitation.target_email,
+        "current_user_email": current_email,
     }

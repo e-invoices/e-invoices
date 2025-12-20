@@ -76,16 +76,6 @@ export interface GoogleInitConfig {
   cancel_on_tap_outside?: boolean
 }
 
-// Auth modal exposed methods
-export interface LoginModalExposed {
-  handleGoogleLogin: (response: GoogleCredentialResponse) => Promise<void>
-  handleGoogleError: () => void
-}
-
-export interface RegisterModalExposed {
-  handleGoogleRegister: (response: GoogleCredentialResponse) => Promise<void>
-  handleGoogleError: () => void
-}
 
 // Organization switching
 export interface SwitchOrganizationRequest {

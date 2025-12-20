@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   code: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }>()
 
 // Map language codes to country codes for flags
@@ -14,11 +14,12 @@ const flagCodes: Record<string, string> = {
 
 <template>
   <span
-    class="inline-flex items-center justify-center rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700 flex-shrink-0"
+    class="inline-flex items-center justify-center rounded-full overflow-hidden bg-slate-300 dark:bg-slate-700 flex-shrink-0"
     :class="{
       'w-5 h-5': size === 'sm',
       'w-6 h-6': size === 'md' || !size,
-      'w-8 h-8': size === 'lg'
+      'w-8 h-8': size === 'lg',
+      'w-10 h-10': size === 'xl'
     }"
   >
     <img

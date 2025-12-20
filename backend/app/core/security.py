@@ -86,3 +86,24 @@ def get_user_context(token: str = Depends(oauth2_scheme)) -> UserContext:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token",
         )
+
+
+# Optional OAuth2 scheme that doesn't require authentication
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+
+
+def get_optional_user_context(
+    token: str | None = Depends(oauth2_scheme_optional),
+) -> UserContext | None:
+    """Extract user context from JWT token, or return None if not authenticated"""
+    if not token:
+        return None
+    try:
+        payload = decode_access_token(token)
+        return UserContext(
+            user_id=int(payload.get("sub")),
+            organization_id=payload.get("org_id"),
+            role=payload.get("org_role"),
+        )
+    except (ValueError, TypeError):
+        return None

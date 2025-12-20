@@ -70,7 +70,25 @@ export interface JoinOrganizationResponse {
 
 export interface ValidateInvitationResponse {
   valid: boolean
+  organization_id: number
   organization_name: string
   role: OrganizationRole
   already_member: boolean
+  target_email: string | null
+  current_user_email: string | null
+}
+
+export interface TeamMember {
+  id: number  // user_organization id
+  user_id: number
+  email: string
+  full_name: string
+  picture_url: string | null
+  role: OrganizationRole
+  joined_at: string
+}
+
+export interface TeamMembersResponse {
+  members: TeamMember[]
+  total: number
 }

@@ -133,6 +133,41 @@ class JoinOrganizationResponse(BaseModel):
     role: OrganizationRole
 
 
+class TeamMember(BaseModel):
+    """Schema for a team member in an organization."""
+
+    id: int  # user_organization id
+    user_id: int
+    email: str
+    full_name: str
+    picture_url: Optional[str] = None
+    role: OrganizationRole
+    joined_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TeamMembersResponse(BaseModel):
+    """List of team members."""
+
+    members: List[TeamMember]
+    total: int
+
+
+class ChangeMemberRoleRequest(BaseModel):
+    """Request to change a member's role."""
+
+    role: OrganizationRole
+
+
+class ChangeMemberRoleResponse(BaseModel):
+    """Response after changing a member's role."""
+
+    message: str
+    member: TeamMember
+
+
 # List responses
 class UserOrganizationsResponse(BaseModel):
     """List of user's organizations."""
